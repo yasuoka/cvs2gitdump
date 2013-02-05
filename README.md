@@ -9,8 +9,8 @@ A small python script which imports cvs tree into git repository.
 - converts only tags on HEAD
 - not convert any branches
 
-Usage
------
+Example
+-------
 
 First import:
 
@@ -34,8 +34,8 @@ A small python script which imports cvs tree into subversion repository.
 - imports incremetally
 - not convert any tags and any branches
 
-Usage
------
+Example
+-------
 
 First import:
 
