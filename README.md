@@ -4,6 +4,7 @@ cvs2gitdump
 A python script which imports cvs tree into git repository.
 
 - requires `rcsparse'
+  - http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse/
 - supports incremetal import
 - support convert tags on HEAD only
 - not support any branches
