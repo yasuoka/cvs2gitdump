@@ -41,12 +41,12 @@ First import:
 
     % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src > openbsd.dump
     % svnadmin create /svnrepo
-    % svn mkdir --parents -m 'mkdir /vendor/openbsd/head' file:///svnrepo/vendor/openbsd/head
-    % svnadmin load --parent-dir /vendor/openbsd/head /svnrepo < openbsd.dump
+    % svn mkdir --parents -m 'mkdir /vendor/openbsd/head/src' file:///svnrepo/vendor/openbsd/head/src
+    % svnadmin load --parent-dir /vendor/openbsd/head/src /svnrepo < openbsd.dump
 
 Periodic import:
 
     % sudo cvsync
-    % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src file:///svnrepo vendor/openbsd/head > openbsd2.dump
-    % svnadmin load --parent-dir /vendor/openbsd/head /svnrepo < openbsd2.dump
+    % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src file:///svnrepo vendor/openbsd/head/src > openbsd2.dump
+    % svnadmin load /svnrepo < openbsd2.dump
 
