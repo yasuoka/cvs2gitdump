@@ -18,8 +18,7 @@
 # Usage
 #
 #   First import:
-#   % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
-#       > openbsd.dump
+#   % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src > openbsd.dump
 #   % svnadmin create /svnrepo
 #   % svn mkdir --parents -m 'mkdir /vendor/openbsd/head/src' \
 #	file:///svnrepo/vendor/openbsd/head/src
@@ -28,8 +27,8 @@
 #
 #   Periodic import:
 #   % sudo cvsync
-#   % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
-#       file:///svnrepo vendor/openbsd/head/src > openbsd2.dump
+#   % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src file:///svnrepo \
+@	vendor/openbsd/head/src > openbsd2.dump
 #   % svnadmin load < openbsd2.dump
 #	
 
@@ -145,9 +144,13 @@ def main():
 	finfo = k.revs[0]
 	rcsfile = rcsparse.rcsfile(finfo[2])
 	log = unicode(rcsfile.getlog(finfo[0]), log_encoding).encode('utf-8')
-	author = unicode(k.author, log_encoding).encode('utf-8')
 
-	revprops = str_prop('svn:author', author)
+	if email_domain is None:
+	    email = k.author
+        else:
+	    email = k.author + '@' + email_domain
+
+	revprops = str_prop('svn:author', email)
 	revprops += str_prop('svn:date', svn_time(k.max_time))
 	revprops += str_prop('svn:log', log)
 	revprops += 'PROPS-END\n'

@@ -9,6 +9,52 @@ A small python script which imports cvs tree into git repository.
 - converts only tags on HEAD
 - not convert any branches
 
+Usage
+-----
+
+    usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
+        [-k rcs_keywords] cvsroot [git_dir]
+
+
+### Options
+
+* -a
+
+  As the default the script will not use the changes in the last 10
+  minutes because they are not stable if the repository is changing.
+  This option will change this behavior, it will use the entire
+  changes.
+
+* -h
+
+  Show the usage.
+
+* -z fuzz
+
+  When the script collects changesets from CVS repository, commits by the
+  same author, using the same log message and within <fuzz> seconds are
+  collected into the same changeset.  300 (seconds) is used as the default.
+
+* -e email_domain
+  Append the email domain to the author.
+
+* -E log_encoding
+
+  Specify the character encoding which is used in CVS logs.
+
+* -k rcs_keywords
+
+  Add an extra RCS keyword which are used by CVS.  The script substitutes
+  the RCS keyword by the same way as $Id$.
+
+* cvsroot
+
+  The target cvsroot or the sub directory of the cvsroot.
+
+* git_dir
+
+  The git repository.  Specify this for incremental import.
+
 Example
 -------
 
@@ -39,7 +85,7 @@ Example
 
 First import:
 
-    % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src > openbsd.dump
+    % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src > openbsd.dump
     % svnadmin create /svnrepo
     % svn mkdir --parents -m 'mkdir /vendor/openbsd/head/src' file:///svnrepo/vendor/openbsd/head/src
     % svnadmin load --parent-dir /vendor/openbsd/head/src /svnrepo < openbsd.dump
@@ -47,6 +93,6 @@ First import:
 Periodic import:
 
     % sudo cvsync
-    % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src file:///svnrepo vendor/openbsd/head/src > openbsd2.dump
+    % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src file:///svnrepo vendor/openbsd/head/src > openbsd2.dump
     % svnadmin load /svnrepo < openbsd2.dump
 
