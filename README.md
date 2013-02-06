@@ -26,8 +26,7 @@ Usage
 
   As the default the script will not use the changes in the last 10
   minutes because they are not stable if the repository is changing.
-  This option will change this behavior, it will use the entire
-  changes.
+  This option will change this behavior, it will use the entire changes.
 
 * -h
 
@@ -35,11 +34,13 @@ Usage
 
 * -z fuzz
 
-  When the script collects changesets from CVS repository, commits by the
-  same author, using the same log message and within <fuzz> seconds are
-  collected into the same changeset.  300 (seconds) is used as the default.
+  When the script collects changesets from CVS repository, commits by
+  the same author, using the same log message and within ``fuzz``
+  seconds are collected into the same changeset.  300 (seconds) is used
+  as the default.
 
 * -e email_domain
+
   Append the email domain to the author.
 
 * -E log_encoding
@@ -48,8 +49,8 @@ Usage
 
 * -k rcs_keywords
 
-  Add an extra RCS keyword which are used by CVS.  The script substitutes
-  the RCS keyword by the same way as $Id$.
+  Add an extra RCS keyword which are used by CVS.  The script
+  substitutes the RCS keyword by the same way as $Id$.
 
 * cvsroot
 
