@@ -8,6 +8,10 @@ A small python script which imports cvs tree into git repository.
 - imports incremetally
 - converts only tags on HEAD
 - not convert any branches
+- an alternative to
+  - [git-cvs](https://github.com/ustuehler/git-cvs)
+  - [bigcvs2git](https://github.com/jcs/bigcvs2git)
+  - [cvs2svn](http://cvs2svn.tigris.org/)
 
 Usage
 -----
