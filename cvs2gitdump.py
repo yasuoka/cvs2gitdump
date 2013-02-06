@@ -259,6 +259,7 @@ class CvsConv:
 	p = '0'
 	novendor = False
 	have_initial_revision = False
+	last_vendor_status = None
 	for k,v in revs:
 	    r = k.split('.')
 	    if len(r) == 4 and r[0] == '1' and r[1] == '1' and r[2] == '1' \
@@ -267,10 +268,12 @@ class CvsConv:
 		    continue
 		if v[3] == 'dead':
 		    continue
+		last_vendor_status = v[3]
 		have_initial_revision = True
 	    elif len(r) == 4 and r[0] == '1' and r[1] == '1' and r[2] == '1':
 		if novendor:
 		    continue
+		last_vendor_status = v[3]
 	    elif len(r) == 2:
 		if r[0] == '1' and r[1] == '1':
 		    if have_initial_revision:
@@ -280,6 +283,10 @@ class CvsConv:
 		    have_initial_revision = True
 		elif r[0] == '1' and r[1] != '1':
 		    novendor = True
+		if last_vendor_status == 'dead' and v[3] == 'dead':
+		    last_vendor_status = None
+		    continue
+		last_vendor_status = None
 	    else:
 		# trunk only
 		continue
