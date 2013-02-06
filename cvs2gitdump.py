@@ -18,7 +18,7 @@
 # Usage
 #
 #   First import:
-#   % git init --bare openbsd.git
+#   % git init --bare /git/openbsd.git
 #   % python cvs2gitdump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
 # 	> openbsd.dump
 #   % git --git-dir /git/openbsd.git fast-import < openbsd.dump
