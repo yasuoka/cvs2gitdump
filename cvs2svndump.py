@@ -18,7 +18,7 @@
 # Usage
 #
 #   First import:
-#   % python cvs2gitdump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
+#   % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
 #       > openbsd.dump
 #   % svnadmin create /svnrepo
 #   % svn mkdir --parents -m 'mkdir /vendor/openbsd/head' \
@@ -27,7 +27,7 @@
 #
 #   Periodic import:
 #   % sudo cvsync
-#   % python cvs2gitdump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
+#   % python cvs2svndump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src \
 #       file:///svnrepo vendor/openbsd/head > openbsd2.dump
 #   % svnadmin load --parent-dir /vendor/openbsd/head /svnrepo < openbsd2.dump
 #	
