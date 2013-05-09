@@ -118,10 +118,13 @@ def main():
 
     found_last_revision = False
     markseq = cvs.markseq
+    extags = set()
     for k in changesets:
 	if do_incremental and not found_last_revision:
 	    if k.max_time == git_ctime and k.author == git_author:
 		found_last_revision = True
+	    for tag in k.tags:
+		extags.add(tag)
 	    continue
 	if k.max_time > max_time_max:
 	    break
@@ -168,6 +171,8 @@ def main():
 		print 'M %o :%d %s' % (mode, m, fn)
 	print ''
 	for tag in k.tags:
+	    if tag in extags:
+		continue
 	    print 'tag', tag
 	    print 'from :%d' % (markseq)
 	    print 'tagger %s <%s> %d +0000' % (k.author, email, k.max_time)
