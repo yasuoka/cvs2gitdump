@@ -28,7 +28,7 @@
 #   Periodic import:
 #   % sudo cvsync
 #   % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src file:///svnrepo \
-@	vendor/openbsd/head/src > openbsd2.dump
+#	vendor/openbsd/head/src > openbsd2.dump
 #   % svnadmin load < openbsd2.dump
 #	
 
