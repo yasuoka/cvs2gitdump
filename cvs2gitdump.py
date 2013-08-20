@@ -46,18 +46,19 @@ CHANGESET_FUZZ_SEC = 300
 def usage():
     print >>sys.stderr, \
 	'usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]'
-    print >>sys.stderr, '\t[-k rcs_keywords] cvsroot [git_dir]'
+    print >>sys.stderr, '\t[-k rcs_keywords] [-b branch] cvsroot [git_dir]'
 
 def main():
     email_domain = None
     do_incremental = False
     git_tip = None
+    git_branch = 'master'
     dump_all = False
     log_encoding = 'iso-8859-1'
     rcs = RcsKeywords();
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'ahz:e:E:k:')
+	opts, args = getopt.getopt(sys.argv[1:], 'ab:hz:e:E:k:')
 	for opt, v in opts:
 	    if opt == '-z':
 		CHANGESET_FUZZ_SEC = int(v)
@@ -65,6 +66,8 @@ def main():
 		email_domain = v
 	    elif opt == '-a':
 		dump_all = True
+	    elif opt == '-b':
+		git_branch = v
 	    elif opt == '-E':
 		log_encoding = v
 	    elif opt == '-k':
@@ -87,8 +90,8 @@ def main():
 
     if len(args) == 2:
 	git = subprocess.Popen(['git', '--git-dir=' + args[1], 'log',
-	    '--max-count', '1', '--date=raw', '--format=%cn%n%cd%n%H' ],
-	    stdout=subprocess.PIPE)
+	    '--max-count', '1', '--date=raw', '--format=%cn%n%cd%n%H',
+	    git_branch], stdout=subprocess.PIPE)
 	outs = git.stdout.readlines()
 	git.wait()
 	if git.returncode != 0:
@@ -142,7 +145,7 @@ def main():
 	log = rcsparse.rcsfile(k.revs[0][2]).getlog(k.revs[0][0])
 	log = unicode(log, log_encoding).encode('utf-8')
 
-	print 'commit refs/heads/master'
+	print 'commit refs/heads/' + git_branch
 	markseq = markseq + 1
 	print 'mark :%d' % (markseq)
 	if email_domain is None:

@@ -24,7 +24,7 @@ Usage
 -----
 
     usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
-        [-k rcs_keywords] cvsroot [git_dir]
+        [-k rcs_keywords] [-b branch] cvsroot [git_dir]
 
 
 ### Options
@@ -34,6 +34,11 @@ Usage
   As the default the script will not use the changes in the last 10
   minutes because they are not stable if the repository is changing.
   This option will change this behavior, it will use the entire changes.
+
+* -b branch
+
+  The branch name of the git repository which is used for incremental
+  import.
 
 * -h
 
