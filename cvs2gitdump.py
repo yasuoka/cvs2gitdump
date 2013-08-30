@@ -334,7 +334,6 @@ def node_path(r,n,p):
 
 def git_dump_file(path, k, rcs, markseq):
     try:
-	rcs.add_id_keyword('OpenBSD')
 	cont = rcs.expand_keyword(path, k)
     except RuntimeError, msg:
 	print >> sys.stderr, 'Unexpected runtime error on parsing', \
