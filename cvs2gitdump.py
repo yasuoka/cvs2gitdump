@@ -56,9 +56,10 @@ def main():
     dump_all = False
     log_encoding = 'iso-8859-1'
     rcs = RcsKeywords();
+    module = None
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'ab:hz:e:E:k:')
+	opts, args = getopt.getopt(sys.argv[1:], 'ab:hm:z:e:E:k:')
 	for opt, v in opts:
 	    if opt == '-z':
 		CHANGESET_FUZZ_SEC = int(v)
@@ -72,6 +73,8 @@ def main():
 		log_encoding = v
 	    elif opt == '-k':
 		rcs.add_id_keyword(v)
+	    elif opt == '-m':
+		module = v
 	    elif opt == '-h':
 		usage()
 		sys.exit(1)
@@ -102,7 +105,7 @@ def main():
 	git_tip = outs[2].strip()
 	do_incremental = True
 
-    cvs = CvsConv(cvsroot, rcs, None, not do_incremental)
+    cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'
     cvs.walk()
 
@@ -299,7 +302,7 @@ class CvsConv:
 		# trunk only
 		continue
 
-	    if self.dumpfile:
+ 	    if self.dumpfile:
 		self.markseq = self.markseq + 1
 		git_dump_file(path, k, self.rcs, self.markseq)
 
