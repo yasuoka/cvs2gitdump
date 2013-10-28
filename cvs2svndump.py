@@ -29,7 +29,7 @@
 #   % sudo cvsync
 #   % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src file:///svnrepo \
 #	vendor/openbsd/head/src > openbsd2.dump
-#   % svnadmin load < openbsd2.dump
+#   % svnadmin load /svnrepo < openbsd2.dump
 #	
 
 # $Id$
