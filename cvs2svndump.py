@@ -493,7 +493,7 @@ class RcsKeywords:
     RCS_KWEXP_KVL     = (RCS_KWEXP_NAME | RCS_KWEXP_VAL | RCS_KWEXP_LKR)
 
     def __init__(self):
-    	self.rerecomple()
+	self.rerecomple()
 
     def rerecomple(self):
 	pat = '|'.join(self.rcs_expkw.keys())
@@ -501,11 +501,11 @@ class RcsKeywords:
 
     def add_id_keyword(self, keyword):
 	self.rcs_expkw[keyword] = self.RCS_KW_ID
-    	self.rerecomple()
+	self.rerecomple()
 
     def kflag_get(self,flags):
 	if flags is None:
-	    return self.RCS_KWEXP_DEFAULT 
+	    return self.RCS_KWEXP_DEFAULT
 	fl = 0
 	for fc in flags:
 	    if fc == 'k':
