@@ -182,6 +182,8 @@ def main():
 	    print 'data 0'
 	    print ''
 
+    if do_incremental and not found_last_revision:
+	raise Exception('could not find the last revision')
 
     print >>sys.stderr, '** dumped'
 

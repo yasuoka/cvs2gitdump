@@ -108,6 +108,15 @@ def main():
 		    (svn.last_rev, svn.last_author)
 	except:
 	    pass
+
+    # strip off the domain part from the last author since cvs doen't have
+    # the domain part.
+    if do_incremental and email_domain is not None and \
+	    svn.last_author.lower().endswith(('@' + email_domain).lower()):
+	last_author = svn.last_author[:-1 * (1 + len(email_domain))]
+    else:
+	last_author = svn.last_author
+
     print >>sys.stderr, '** walk cvs tree'
     cvs.walk()
 
@@ -130,7 +139,7 @@ def main():
     found_last_revision = False
     for i, k in enumerate(changesets):
 	if do_incremental and not found_last_revision:
-	    if k.max_time == svn.last_date and k.author == svn.last_author:
+	    if k.max_time == svn.last_date and k.author == last_author:
 		found_last_revision = True
 	    continue
 	if k.max_time > max_time_max:
@@ -201,6 +210,10 @@ def main():
 	    print ''
 	    print fileprops + filecont
 	    print ''
+
+    if do_incremental and not found_last_revision:
+	raise Exception('could not find the last revision')
+
     print >>sys.stderr, '** dumped'
 
 class ChangeSetKey:
