@@ -176,10 +176,8 @@ def main():
 	for tag in k.tags:
 	    if tag in extags:
 		continue
-	    print 'tag', tag
+	    print 'reset refs/tags/%s' % (tag)
 	    print 'from :%d' % (markseq)
-	    print 'tagger %s <%s> %d +0000' % (k.author, email, k.max_time)
-	    print 'data 0'
 	    print ''
 
     if do_incremental and not found_last_revision:
