@@ -24,7 +24,7 @@ Usage
 -----
 
     usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
-        [-k rcs_keywords] [-b branch] cvsroot [git_dir]
+        [-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]
 
 
 ### Options
@@ -64,9 +64,15 @@ Usage
   Add an extra RCS keyword which are used by CVS.  The script
   substitutes the RCS keyword by the same way as $Id$.
 
+* -m module
+
+  Specify the target module name in the target cvsroot.  The script will
+  dump only the directory specified by this option.
+
 * cvsroot
 
-  The target cvsroot or the sub directory of the cvsroot.
+  The target cvsroot or the sub directory of the cvsroot.  The script treats
+  this directory as the root directory.
 
 * git_dir
 
@@ -109,7 +115,7 @@ Usage
 -----
 
     usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
-        [-k rcs_keywords] cvsroot [git_dir]
+        [-k rcs_keywords] [-m module] cvsroot [git_dir]
 
     usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
 	[-k rcs_keywords] cvsroot [svnroot svnpath]]
@@ -147,9 +153,15 @@ Usage
   Add an extra RCS keyword which are used by CVS.  The script
   substitutes the RCS keyword by the same way as $Id$.
 
+* -m module
+
+  Specify the target module name in the target cvsroot.  The script will
+  dump only the directory specified by this option.
+
 * cvsroot
 
-  The target cvsroot or the sub directory of the cvsroot.
+  The target cvsroot or the sub directory of the cvsroot.  The script treats
+  this directory as the root directory.
 
 * svn_dir svn_path
 

@@ -51,7 +51,8 @@ CHANGESET_FUZZ_SEC = 300
 def usage():
     print >>sys.stderr, \
 	'usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]'
-    print >>sys.stderr, '\t[-k rcs_keywords] cvsroot [svnroot svnpath]]'
+    print >>sys.stderr, '\t[-k rcs_keywords] [-m module] cvsroot ' + \
+	    '[svnroot svnpath]]'
 
 def main():
     email_domain = None
@@ -73,6 +74,8 @@ def main():
 		log_encoding = v
 	    elif opt == '-k':
 		rcs.add_id_keyword(v)
+	    elif opt == '-m':
+		module = v
 	    elif opt == '-h':
 		usage()
 		sys.exit(1)
@@ -95,7 +98,7 @@ def main():
 	svnroot = None
 	svnpath = None
 
-    cvs = CvsConv(cvsroot, rcs, None, not do_incremental)
+    cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     if svnroot is None:
 	svn = SvnDumper()
     else:

@@ -46,7 +46,7 @@ CHANGESET_FUZZ_SEC = 300
 def usage():
     print >>sys.stderr, \
 	'usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]'
-    print >>sys.stderr, '\t[-k rcs_keywords] [-b branch] cvsroot [git_dir]'
+    print >>sys.stderr, '\t[-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]'
 
 def main():
     email_domain = None
