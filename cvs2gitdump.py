@@ -93,7 +93,7 @@ def main():
 
     if len(args) == 2:
 	git = subprocess.Popen(['git', '--git-dir=' + args[1], 'log',
-	    '--max-count', '1', '--date=raw', '--format=%cn%n%cd%n%H',
+	    '--max-count', '1', '--date=raw', '--format=%ce%n%cd%n%H',
 	    git_branch], stdout=subprocess.PIPE)
 	outs = git.stdout.readlines()
 	git.wait()
@@ -104,6 +104,14 @@ def main():
 	git_ctime = float(outs[1].split()[0])
 	git_tip = outs[2].strip()
 	do_incremental = True
+
+    # strip off the domain part from the last author since cvs doesn't have
+    # the domain part.
+    if do_incremental and email_domain is not None and \
+	    git_author.lower().endswith(('@' + email_domain).lower()):
+	last_author = git_author[:-1 * (1 + len(email_domain))]
+    else:
+	last_author = git_author
 
     cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'
@@ -127,7 +135,7 @@ def main():
     extags = set()
     for k in changesets:
 	if do_incremental and not found_last_revision:
-	    if k.max_time == git_ctime and k.author == git_author:
+	    if k.max_time == git_ctime and k.author == last_author:
 		found_last_revision = True
 	    for tag in k.tags:
 		extags.add(tag)
