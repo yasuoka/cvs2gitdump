@@ -98,7 +98,6 @@ def main():
 	svnroot = None
 	svnpath = None
 
-    cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     if svnroot is None:
 	svn = SvnDumper()
     else:
@@ -112,7 +111,7 @@ def main():
 	except:
 	    pass
 
-    # strip off the domain part from the last author since cvs doen't have
+    # strip off the domain part from the last author since cvs doesn't have
     # the domain part.
     if do_incremental and email_domain is not None and \
 	    svn.last_author.lower().endswith(('@' + email_domain).lower()):
@@ -120,6 +119,7 @@ def main():
     else:
 	last_author = svn.last_author
 
+    cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'
     cvs.walk()
 
