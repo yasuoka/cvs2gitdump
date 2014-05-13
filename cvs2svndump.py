@@ -236,7 +236,11 @@ class ChangeSetKey:
 	self.max_time = time
 	self.revs = []
 	self.tags = []
-	self.log_hash = hash(log)
+	self.log_hash = 0
+	h = 0
+	for c in log:
+	    h = 31 * h + ord(c)
+	self.log_hash = h
 
     def __cmp__(self, anon):
 	if isinstance(anon, ChangeSetKey):
@@ -250,9 +254,7 @@ class ChangeSetKey:
 	    if c == 0: c = cmp(self.author, anon.author)
 	    if c == 0:
 		return 0
-	    if ct != 0:
-		return ct
-	    return c
+	    return ct if ct != 0 else c
 	return -1
 
     def merge(self, anon):
@@ -261,7 +263,7 @@ class ChangeSetKey:
 	self.revs.extend(anon.revs)
 
     def __hash__(self):
-	return hash((self.branch , self.author, self.log_hash))
+	return hash(self.branch + '/' + self.author) * 31 + self.log_hash
 
 class CvsConv:
     def __init__(self, cvsroot, rcs, module = None, dumpfile = False):
@@ -586,10 +588,9 @@ class RcsKeywords:
 		if (mode & self.RCS_KWEXP_VAL) != 0:
 		    expkw = self.rcs_expkw[m.group(1)]
 		    if (expkw & self.RCS_KW_RCSFILE) != 0:
-			if (expkw & self.RCS_KW_FULLPATH) != 0:
-			    expbuf += filename
-			else:
-			    expbuf += os.path.basename(filename)
+			expbuf += filename \
+			    if (expkw & self.RCS_KW_FULLPATH) != 0 \
+			    else os.path.basename(filename)
 			expbuf += " "
 		    if (expkw & self.RCS_KW_REVISION) != 0:
 			expbuf += rev[0]
@@ -599,10 +600,8 @@ class RcsKeywords:
 			    time.gmtime(rev[1]))
 		    if (expkw & self.RCS_KW_MDOCDATE) != 0:
 			d = time.gmtime(rev[1])
-			if d.tm_mday < 10:
-			    expbuf += time.strftime("%B%e %Y ", d)
-			else:
-			    expbuf += time.strftime("%B %e %Y ", d)
+			expbuf += time.strftime( \
+			    "%B%e %Y " if (d.tm_mday < 10) else "%B %e %Y ", d)
 		    if (expkw & self.RCS_KW_AUTHOR) != 0:
 			expbuf += rev[2]
 			expbuf += " "
@@ -611,10 +610,9 @@ class RcsKeywords:
 			expbuf += " "
 		    if (expkw & self.RCS_KW_LOG) != 0:
 			p = prefix
-			if (expkw & self.RCS_KW_FULLPATH) != 0:
-			    expbuf += filename
-			else:
-			    expbuf += os.path.basename(filename)
+			expbuf += filename \
+			    if (expkw & self.RCS_KW_FULLPATH) != 0 \
+			    else os.path.basename(filename)
 			expbuf += " "
 			logbuf += '%sRevision %s  ' % (p, rev[0])
 			logbuf += time.strftime("%Y/%m/%d %H:%M:%S  ",\
