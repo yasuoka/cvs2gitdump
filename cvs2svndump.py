@@ -111,13 +111,13 @@ def main():
 	except:
 	    pass
 
-    # strip off the domain part from the last author since cvs doesn't have
-    # the domain part.
-    if do_incremental and email_domain is not None and \
-	    svn.last_author.lower().endswith(('@' + email_domain).lower()):
-	last_author = svn.last_author[:-1 * (1 + len(email_domain))]
-    else:
-	last_author = svn.last_author
+	# strip off the domain part from the last author since cvs doesn't have
+	# the domain part.
+	if do_incremental and email_domain is not None and \
+		svn.last_author.lower().endswith(('@' + email_domain).lower()):
+	    last_author = svn.last_author[:-1 * (1 + len(email_domain))]
+	else:
+	    last_author = svn.last_author
 
     cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'

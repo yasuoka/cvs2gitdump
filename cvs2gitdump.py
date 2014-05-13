@@ -105,13 +105,13 @@ def main():
 	git_tip = outs[2].strip()
 	do_incremental = True
 
-    # strip off the domain part from the last author since cvs doesn't have
-    # the domain part.
-    if do_incremental and email_domain is not None and \
-	    git_author.lower().endswith(('@' + email_domain).lower()):
-	last_author = git_author[:-1 * (1 + len(email_domain))]
-    else:
-	last_author = git_author
+	# strip off the domain part from the last author since cvs doesn't have
+	# the domain part.
+	if do_incremental and email_domain is not None and \
+		git_author.lower().endswith(('@' + email_domain).lower()):
+	    last_author = git_author[:-1 * (1 + len(email_domain))]
+	else:
+	    last_author = git_author
 
     cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'
