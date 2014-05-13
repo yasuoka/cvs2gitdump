@@ -62,7 +62,7 @@ def main():
     rcs = RcsKeywords();
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'ahz:e:E:k:')
+	opts, args = getopt.getopt(sys.argv[1:], 'ahm:z:e:E:k:')
 	for opt, v in opts:
 	    if opt == '-z':
 		CHANGESET_FUZZ_SEC = int(v)
