@@ -54,7 +54,7 @@ def main():
     git_tip = None
     git_branch = 'master'
     dump_all = False
-    log_encoding = 'iso-8859-1'
+    log_encoding = 'utf-8,iso-8859-1'
     rcs = RcsKeywords();
     module = None
 
@@ -86,6 +86,8 @@ def main():
     if len(args) != 1 and len(args) != 2:
 	usage()
 	sys.exit(1)
+
+    log_encodings = log_encoding.split(',')
 
     cvsroot = args[0]
     while cvsroot[-1] == '/':
@@ -154,7 +156,14 @@ def main():
 		git_dump_file(f[2], f[0], rcs, markseq)
 		marks[markseq] = f
 	log = rcsparse.rcsfile(k.revs[0][2]).getlog(k.revs[0][0])
-	log = unicode(log, log_encoding).encode('utf-8')
+	for i, e in enumerate(log_encodings):
+	    try:
+		how = 'ignore' if i == len(log_encodings) - 1 else 'strict';
+		log = log.decode(e, how)
+		break
+	    except:
+		pass
+	log = log.encode('utf-8', 'ignore')
 
 	print 'commit refs/heads/' + git_branch
 	markseq = markseq + 1

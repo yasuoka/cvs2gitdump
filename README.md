@@ -24,7 +24,7 @@ Prerequirement:
 Usage
 -----
 
-    usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
+    usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encodings]
         [-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]
 
 
@@ -56,9 +56,11 @@ Usage
 
   Append the email domain to the author.
 
-* -E log_encoding
+* -E log_encodings
 
-  Specify the character encoding which is used in CVS logs.
+  Specify the character encodings used for decoding CVS logs.  Multiple
+  encodings can be specified by spearating with ','.   Specified encodings
+  are used in order for decoding the log.  Default is 'utf-8,iso-8859-1'
 
 * -k rcs_keywords
 
@@ -116,11 +118,8 @@ Prerequirement:
 Usage
 -----
 
-    usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
-        [-k rcs_keywords] [-m module] cvsroot [git_dir]
-
-    usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]
-	[-k rcs_keywords] cvsroot [svnroot svnpath]]
+    usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encodings]
+	[-k rcs_keywords] [-m module] cvsroot [svnroot svnpath]]
 
 
 ### Options
@@ -146,9 +145,11 @@ Usage
 
   Append the email domain to the author.
 
-* -E log_encoding
+* -E log_encodings
 
-  Specify the character encoding which is used in CVS logs.
+  Specify the character encodings used for decoding CVS logs.  Multiple
+  encodings can be specified by spearating with ',' and they are used in
+  order.  Default is 'utf-8,iso-8859-1'
 
 * -k rcs_keywords
 

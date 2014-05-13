@@ -58,7 +58,7 @@ def main():
     email_domain = None
     do_incremental = False
     dump_all = False
-    log_encoding = 'iso-8859-1'
+    log_encoding = 'utf-8,iso-8859-1'
     rcs = RcsKeywords();
 
     try:
@@ -87,6 +87,8 @@ def main():
     if len(args) != 1 and len(args) != 3:
 	usage()
 	sys.exit(1)
+
+    log_encodings = log_encoding.split(',')
 
     cvsroot = args[0]
     while cvsroot[-1] == '/':
@@ -155,7 +157,14 @@ def main():
 	# parse the first file to get log
 	finfo = k.revs[0]
 	rcsfile = rcsparse.rcsfile(finfo[2])
-	log = unicode(rcsfile.getlog(finfo[0]), log_encoding).encode('utf-8')
+	for i, e in enumerate(log_encodings):
+	    try:
+		how = 'ignore' if i == len(log_encodings) - 1 else 'strict';
+		log = log.decode(e, how)
+		break
+	    except:
+		pass
+	log = log.encode('utf-8', 'ignore')
 
 	if email_domain is None:
 	    email = k.author
