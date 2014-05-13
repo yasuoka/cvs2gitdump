@@ -50,7 +50,7 @@ CHANGESET_FUZZ_SEC = 300
 
 def usage():
     print >>sys.stderr, \
-	'usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encoding]'
+	'usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encodings]'
     print >>sys.stderr, '\t[-k rcs_keywords] [-m module] cvsroot ' + \
 	    '[svnroot svnpath]]'
 
