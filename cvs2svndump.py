@@ -60,6 +60,7 @@ def main():
     dump_all = False
     log_encoding = 'utf-8,iso-8859-1'
     rcs = RcsKeywords();
+    module = None
 
     try:
 	opts, args = getopt.getopt(sys.argv[1:], 'ahm:z:e:E:k:')
