@@ -146,7 +146,6 @@ def main():
 	    break
 
 	marks = {}
-	log = None
 
 	for f in k.revs:
 	    if not do_incremental:
@@ -316,7 +315,7 @@ class CvsConv:
 		# trunk only
 		continue
 
- 	    if self.dumpfile:
+	    if self.dumpfile:
 		self.markseq = self.markseq + 1
 		git_dump_file(path, k, self.rcs, self.markseq)
 
