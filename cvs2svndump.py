@@ -231,11 +231,12 @@ def main():
     print >>sys.stderr, '** dumped'
 
 class ChangeSetKey:
-    def __init__(self, branch, author, time, log):
+    def __init__(self, branch, author, time, log, commitid = None):
 	self.branch = branch
 	self.author = author
 	self.min_time = time
 	self.max_time = time
+	self.commitid = commitid
 	self.revs = []
 	self.tags = []
 	self.log_hash = 0
@@ -246,17 +247,32 @@ class ChangeSetKey:
 
     def __cmp__(self, anon):
 	if isinstance(anon, ChangeSetKey):
+
+	    # compare by the commitid
+	    cid = cmp(self.commitid, anon.commitid)
+	    if cid == 0 and self.commitid is not None:
+		# both have commitid and they are same
+		return 0
+
+	    # compare by the time
 	    ma = anon.min_time - self.max_time
 	    mi = self.min_time - anon.max_time
 	    ct = self.max_time - anon.max_time
 	    if ma > CHANGESET_FUZZ_SEC or mi > CHANGESET_FUZZ_SEC:
 		return ct
+
+	    if cid != 0:
+		# only one has the commitid, this means different commit
+		return cid if ct == 0 else ct
+
+	    # compare by log, branch and author
 	    c = cmp(self.log_hash, anon.log_hash)
 	    if c == 0: c = cmp(self.branch, anon.branch)
 	    if c == 0: c = cmp(self.author, anon.author)
 	    if c == 0:
 		return 0
 	    return ct if ct != 0 else c
+
 	return -1
 
     def merge(self, anon):
@@ -350,7 +366,8 @@ class CvsConv:
 		self.markseq = self.markseq + 1
 
 	    b = reduce(lambda a, b: a + '.' + b, r[:-1])
-	    a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]))
+	    a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
+		    v[6])
 	    a.revs.append([k, p, path, v[3], self.markseq])
 	    while self.changesets.has_key(a):
 		c = self.changesets[a]
