@@ -45,8 +45,9 @@ CHANGESET_FUZZ_SEC = 300
 
 def usage():
     print >>sys.stderr, \
-	'usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encodings]'
-    print >>sys.stderr, '\t[-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]'
+	    'usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] ' \
+		'[-E log_encodings]\n' \
+	    '\t[-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]'
 
 def main():
     email_domain = None
@@ -168,7 +169,7 @@ def main():
 	markseq = markseq + 1
 	print 'mark :%d' % (markseq)
 	email = k.author if email_domain is None \
-	    else k.author + '@' + email_domain
+		else k.author + '@' + email_domain
 	print 'author %s <%s> %d +0000' % (k.author, email, k.max_time)
 	print 'committer %s <%s> %d +0000' % (k.author, email, k.max_time)
 
@@ -295,7 +296,7 @@ class CvsConv:
 
 	# sort by time and revision
 	revs = sorted(rcsfile.revs.items(), \
-	    lambda a,b: cmp(a[1][1], b[1][1]) or cmp(b[1][0], a[1][0]))
+		lambda a,b: cmp(a[1][1], b[1][1]) or cmp(b[1][0], a[1][0]))
 	p = '0'
 	novendor = False
 	have_initial_revision = False
@@ -370,9 +371,9 @@ def git_dump_file(path, k, rcs, markseq):
 	cont = rcs.expand_keyword(path, k)
     except RuntimeError, msg:
 	print >> sys.stderr, 'Unexpected runtime error on parsing', \
-	    path, k, ':', msg
+		path, k, ':', msg
 	print >> sys.stderr, 'unlimit the resource limit may fix ' \
-	    'this problem.'
+		'this problem.'
 	sys.exit(1)
     print 'blob'
     print 'mark :%d' % markseq
@@ -490,19 +491,19 @@ class RcsKeywords:
 		    expkw = self.rcs_expkw[m.group(1)]
 		    if (expkw & self.RCS_KW_RCSFILE) != 0:
 			expbuf += filename \
-			    if (expkw & self.RCS_KW_FULLPATH) != 0 \
-			    else os.path.basename(filename)
+				if (expkw & self.RCS_KW_FULLPATH) != 0 \
+				else os.path.basename(filename)
 			expbuf += " "
 		    if (expkw & self.RCS_KW_REVISION) != 0:
 			expbuf += rev[0]
 			expbuf += " "
 		    if (expkw & self.RCS_KW_DATE) != 0:
 			expbuf += time.strftime("%Y/%m/%d %H:%M:%S ", \
-			    time.gmtime(rev[1]))
+				time.gmtime(rev[1]))
 		    if (expkw & self.RCS_KW_MDOCDATE) != 0:
 			d = time.gmtime(rev[1])
-			expbuf += time.strftime( \
-			    "%B%e %Y " if (d.tm_mday < 10) else "%B %e %Y ", d)
+			expbuf += time.strftime("%B%e %Y " \
+				if (d.tm_mday < 10) else "%B %e %Y ", d)
 		    if (expkw & self.RCS_KW_AUTHOR) != 0:
 			expbuf += rev[2]
 			expbuf += " "
@@ -512,12 +513,12 @@ class RcsKeywords:
 		    if (expkw & self.RCS_KW_LOG) != 0:
 			p = prefix
 			expbuf += filename \
-			    if (expkw & self.RCS_KW_FULLPATH) != 0 \
-			    else os.path.basename(filename)
+				if (expkw & self.RCS_KW_FULLPATH) != 0 \
+				else os.path.basename(filename)
 			expbuf += " "
 			logbuf += '%sRevision %s  ' % (p, rev[0])
 			logbuf += time.strftime("%Y/%m/%d %H:%M:%S  ",\
-			    time.gmtime(rev[1]))
+				time.gmtime(rev[1]))
 			logbuf += rev[2] + '\n'
 			for lline in rcs.getlog(rev[0]).rstrip().split('\n'):
 			    if lline == '':

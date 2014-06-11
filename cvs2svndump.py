@@ -50,9 +50,9 @@ CHANGESET_FUZZ_SEC = 300
 
 def usage():
     print >>sys.stderr, \
-	'usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] [-E log_encodings]'
-    print >>sys.stderr, '\t[-k rcs_keywords] [-m module] cvsroot ' + \
-	    '[svnroot svnpath]]'
+	    'usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] '\
+		'[-E log_encodings]\n'\
+	    '\t[-k rcs_keywords] [-m module] cvsroot [svnroot svnpath]]'
 
 def main():
     email_domain = None
@@ -110,7 +110,7 @@ def main():
 	    if svn.last_rev is not None:
 		do_incremental = True
 		print >>sys.stderr, '** svn loaded revision r%d by %s' % \
-		    (svn.last_rev, svn.last_author)
+			(svn.last_rev, svn.last_author)
 	except:
 	    pass
 
@@ -326,7 +326,7 @@ class CvsConv:
 
 	# sort by time and revision
 	revs = sorted(rcsfile.revs.items(), \
-	    lambda a,b: cmp(a[1][1], b[1][1]) or cmp(b[1][0], a[1][0]))
+		lambda a,b: cmp(a[1][1], b[1][1]) or cmp(b[1][0], a[1][0]))
 	p = '0'
 	novendor = False
 	have_initial_revision = False
@@ -474,7 +474,7 @@ class SvnDumper:
 	    dummy,rev = fs.history_location(hist)
 	    d = fs.revision_prop(fs_ptr, rev, core.SVN_PROP_REVISION_DATE)
 	    author = fs.revision_prop(fs_ptr, rev, \
-		core.SVN_PROP_REVISION_AUTHOR)
+		    core.SVN_PROP_REVISION_AUTHOR)
 	    if author == 'svnadmin':
 		continue
 	    self.last_author = author
@@ -608,19 +608,19 @@ class RcsKeywords:
 		    expkw = self.rcs_expkw[m.group(1)]
 		    if (expkw & self.RCS_KW_RCSFILE) != 0:
 			expbuf += filename \
-			    if (expkw & self.RCS_KW_FULLPATH) != 0 \
-			    else os.path.basename(filename)
+				if (expkw & self.RCS_KW_FULLPATH) != 0 \
+				else os.path.basename(filename)
 			expbuf += " "
 		    if (expkw & self.RCS_KW_REVISION) != 0:
 			expbuf += rev[0]
 			expbuf += " "
 		    if (expkw & self.RCS_KW_DATE) != 0:
 			expbuf += time.strftime("%Y/%m/%d %H:%M:%S ", \
-			    time.gmtime(rev[1]))
+				time.gmtime(rev[1]))
 		    if (expkw & self.RCS_KW_MDOCDATE) != 0:
 			d = time.gmtime(rev[1])
-			expbuf += time.strftime( \
-			    "%B%e %Y " if (d.tm_mday < 10) else "%B %e %Y ", d)
+			expbuf += time.strftime("%B%e %Y " \
+				if (d.tm_mday < 10) else "%B %e %Y ", d)
 		    if (expkw & self.RCS_KW_AUTHOR) != 0:
 			expbuf += rev[2]
 			expbuf += " "
@@ -630,12 +630,12 @@ class RcsKeywords:
 		    if (expkw & self.RCS_KW_LOG) != 0:
 			p = prefix
 			expbuf += filename \
-			    if (expkw & self.RCS_KW_FULLPATH) != 0 \
-			    else os.path.basename(filename)
+				if (expkw & self.RCS_KW_FULLPATH) != 0 \
+				else os.path.basename(filename)
 			expbuf += " "
 			logbuf += '%sRevision %s  ' % (p, rev[0])
 			logbuf += time.strftime("%Y/%m/%d %H:%M:%S  ",\
-			    time.gmtime(rev[1]))
+				time.gmtime(rev[1]))
 			logbuf += rev[2] + '\n'
 			for lline in rcs.getlog(rev[0]).rstrip().split('\n'):
 			    if lline == '':
