@@ -366,8 +366,13 @@ class CvsConv:
 		self.markseq = self.markseq + 1
 
 	    b = reduce(lambda a, b: a + '.' + b, r[:-1])
-	    a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
-		    v[6])
+	    try:
+		a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
+			v[6])
+	    except Exception as e:
+		print >>sys.stderr, 'Aborted at %s %s' % (path, v[0])
+		raise e
+
 	    a.revs.append([k, p, path, v[3], self.markseq])
 	    while self.changesets.has_key(a):
 		c = self.changesets[a]
