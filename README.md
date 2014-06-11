@@ -169,7 +169,8 @@ Usage
 * svn_dir svn_path
 
   Specify the svn repository and path.  Specify these for incremental
-  import.
+  import.  When the script searches the last commit, it excepts the commits
+  whose author are 'svnadmin'.  Use 'svnadmin' for manually fixing.
 
 
 Example
