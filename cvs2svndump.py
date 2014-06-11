@@ -158,6 +158,7 @@ def main():
 	# parse the first file to get log
 	finfo = k.revs[0]
 	rcsfile = rcsparse.rcsfile(finfo[2])
+	log = rcsparse.rcsfile(k.revs[0][2]).getlog(k.revs[0][0])
 	for i, e in enumerate(log_encodings):
 	    try:
 		how = 'ignore' if i == len(log_encodings) - 1 else 'strict';
