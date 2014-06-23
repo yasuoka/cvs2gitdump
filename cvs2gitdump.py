@@ -60,12 +60,13 @@ def main():
     rcs = RcsKeywords();
     modules = []
     last_revision = None
+    fuzzsec = CHANGESET_FUZZ_SEC
 
     try:
 	opts, args = getopt.getopt(sys.argv[1:], 'ab:hm:z:e:E:k:t:l:')
 	for opt, v in opts:
 	    if opt == '-z':
-		CHANGESET_FUZZ_SEC = int(v)
+		fuzzsec = int(v)
 	    elif opt == '-e':
 		email_domain = v
 	    elif opt == '-a':
@@ -130,7 +131,7 @@ def main():
 	else:
 	    last_author = last_author
 
-    cvs = CvsConv(cvsroot, rcs, not do_incremental)
+    cvs = CvsConv(cvsroot, rcs, not do_incremental, fuzzsec)
     print >>sys.stderr, '** walk cvs tree'
     if len(modules) == 0:
 	cvs.walk()
@@ -226,12 +227,13 @@ class FileRevision:
 	self.markseq = markseq
 
 class ChangeSetKey:
-    def __init__(self, branch, author, time, log, commitid = None):
+    def __init__(self, branch, author, time, log, commitid, fuzzsec):
 	self.branch = branch
 	self.author = author
 	self.min_time = time
 	self.max_time = time
 	self.commitid = commitid
+	self.fuzzsec = fuzzsec
 	self.revs = []
 	self.tags = []
 	self.log_hash = 0
@@ -253,7 +255,7 @@ class ChangeSetKey:
 	    ma = anon.min_time - self.max_time
 	    mi = self.min_time - anon.max_time
 	    ct = self.max_time - anon.max_time
-	    if ma > CHANGESET_FUZZ_SEC or mi > CHANGESET_FUZZ_SEC:
+	    if ma > self.fuzzsec or mi > self.fuzzsec:
 		return ct
 
 	    if cid != 0:
@@ -282,13 +284,14 @@ class ChangeSetKey:
 	self.revs.append(FileRevision(path, rev, state, markseq))
 
 class CvsConv:
-    def __init__(self, cvsroot, rcs, dumpfile = False):
+    def __init__(self, cvsroot, rcs, dumpfile, fuzzsec):
 	self.cvsroot = cvsroot
 	self.rcs = rcs
 	self.changesets = dict()
 	self.dumpfile = dumpfile
 	self.markseq = 0
 	self.tags = dict()
+	self.fuzzsec = fuzzsec
 
     def walk(self, module = None):
 	p = [self.cvsroot]
@@ -366,7 +369,7 @@ class CvsConv:
 	    b = reduce(lambda a, b: a + '.' + b, r[:-1])
 	    try:
 		a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
-			v[6])
+			v[6], self.fuzzsec)
 	    except Exception as e:
 		print >>sys.stderr, 'Aborted at %s %s' % (path, v[0])
 		raise e
