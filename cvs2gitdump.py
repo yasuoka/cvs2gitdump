@@ -168,12 +168,12 @@ def main():
 
 	for f in k.revs:
 	    if not do_incremental:
-		marks[f[4]] = f
+		marks[f.markseq] = f
 	    else:
 		markseq = markseq + 1
-		git_dump_file(f[2], f[0], rcs, markseq)
+		git_dump_file(f.path, f.rev, rcs, markseq)
 		marks[markseq] = f
-	log = rcsparse.rcsfile(k.revs[0][2]).getlog(k.revs[0][0])
+	log = rcsparse.rcsfile(k.revs[0].path).getlog(k.revs[0].rev)
 	for i, e in enumerate(log_encodings):
 	    try:
 		how = 'ignore' if i == len(log_encodings) - 1 else 'strict';
@@ -199,9 +199,9 @@ def main():
 
 	for m in marks:
 	    f = marks[m]
-	    mode = 0100755 if os.access(f[2], os.X_OK) else 0100644
-	    fn = node_path(cvs.cvsroot, None, f[2]) # XXX
-	    if f[3] == 'dead':
+	    mode = 0100755 if os.access(f.path, os.X_OK) else 0100644
+	    fn = node_path(cvs.cvsroot, None, f.path) # XXX
+	    if f.state == 'dead':
 		print 'D', fn
 	    else:
 		print 'M %o :%d %s' % (mode, m, fn)
@@ -217,6 +217,13 @@ def main():
 	raise Exception('could not find the last revision')
 
     print >>sys.stderr, '** dumped'
+
+class FileRevision:
+    def __init__(self, path, rev, state, markseq):
+	self.path = path
+	self.rev = rev
+	self.state = state
+	self.markseq = markseq
 
 class ChangeSetKey:
     def __init__(self, branch, author, time, log, commitid = None):
@@ -270,6 +277,9 @@ class ChangeSetKey:
 
     def __hash__(self):
 	return hash(self.branch + '/' + self.author) * 31 + self.log_hash
+
+    def put_file(self, path, rev, state, markseq):
+	self.revs.append(FileRevision(path, rev, state, markseq))
 
 class CvsConv:
     def __init__(self, cvsroot, rcs, dumpfile = False):
@@ -361,7 +371,7 @@ class CvsConv:
 		print >>sys.stderr, 'Aborted at %s %s' % (path, v[0])
 		raise e
 
-	    a.revs.append([k, p, path, v[3], self.markseq])
+	    a.put_file(path, k, v[3], self.markseq)
 	    while self.changesets.has_key(a):
 		c = self.changesets[a]
 		del self.changesets[a]
