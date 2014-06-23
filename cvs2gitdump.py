@@ -47,7 +47,8 @@ def usage():
     print >>sys.stderr, \
 	    'usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] ' \
 		'[-E log_encodings]\n' \
-	    '\t[-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]'
+	    '\t[-k rcs_keywords] [-b branch] [-m module] [-l last_revision]\n'\
+	    '\tcvsroot [git_dir]'
 
 def main():
     email_domain = None
@@ -58,9 +59,10 @@ def main():
     log_encoding = 'utf-8,iso-8859-1'
     rcs = RcsKeywords();
     module = None
+    last_revision = None
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'ab:hm:z:e:E:k:')
+	opts, args = getopt.getopt(sys.argv[1:], 'ab:hm:z:e:E:k:t:l:')
 	for opt, v in opts:
 	    if opt == '-z':
 		CHANGESET_FUZZ_SEC = int(v)
@@ -76,6 +78,8 @@ def main():
 		rcs.add_id_keyword(v)
 	    elif opt == '-m':
 		module = v
+	    elif opt == '-l':
+		last_revision = v
 	    elif opt == '-h':
 		usage()
 		sys.exit(1)
@@ -84,7 +88,7 @@ def main():
 	usage()
 	sys.exit(1)
 
-    if len(args) != 1 and len(args) != 2:
+    if len(args) == 0 or len(args) > 2:
 	usage()
 	sys.exit(1)
 
@@ -95,6 +99,7 @@ def main():
 	cvsroot = cvsroot[:-1]
 
     if len(args) == 2:
+	do_incremental = True
 	git = subprocess.Popen(['git', '--git-dir=' + args[1], 'log',
 	    '--max-count', '1', '--date=raw', '--format=%ce%n%cd%n%H',
 	    git_branch], stdout=subprocess.PIPE)
@@ -103,18 +108,27 @@ def main():
 	if git.returncode != 0:
 	    print >> sys.stderr, "Coundn't exec git"
 	    sys.exit(git.returncode)
-	git_author = outs[0].strip()
-	git_ctime = float(outs[1].split()[0])
 	git_tip = outs[2].strip()
-	do_incremental = True
+
+	if last_revision is not None:
+	    git = subprocess.Popen(['git', '--git-dir=' + args[1], 'log',
+		'--max-count', '1', '--date=raw', '--format=%ce%n%cd%n%H',
+		last_revision], stdout=subprocess.PIPE)
+	    outs = git.stdout.readlines()
+	    git.wait()
+	    if git.returncode != 0:
+		print >> sys.stderr, "Coundn't exec git"
+		sys.exit(git.returncode)
+	last_author = outs[0].strip()
+	last_ctime = float(outs[1].split()[0])
 
 	# strip off the domain part from the last author since cvs doesn't have
 	# the domain part.
 	if do_incremental and email_domain is not None and \
-		git_author.lower().endswith(('@' + email_domain).lower()):
-	    last_author = git_author[:-1 * (1 + len(email_domain))]
+		last_author.lower().endswith(('@' + email_domain).lower()):
+	    last_author = last_author[:-1 * (1 + len(email_domain))]
 	else:
-	    last_author = git_author
+	    last_author = last_author
 
     cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'
@@ -138,7 +152,7 @@ def main():
     extags = set()
     for k in changesets:
 	if do_incremental and not found_last_revision:
-	    if k.max_time == git_ctime and k.author == last_author:
+	    if k.max_time == last_ctime and k.author == last_author:
 		found_last_revision = True
 	    for tag in k.tags:
 		extags.add(tag)

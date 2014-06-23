@@ -25,7 +25,8 @@ Usage
 -----
 
     usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] [-E log_encodings]
-        [-k rcs_keywords] [-b branch] [-m module] cvsroot [git_dir]
+        [-k rcs_keywords] [-b branch] [-m module] [-l last_revision]
+	cvsroot [git_dir]
 
 
 ### Options
@@ -71,6 +72,11 @@ Usage
 
   Specify the target module name in the target cvsroot.  The script will
   dump only the directory specified by this option.
+
+* -l last_rev
+
+  Specify the last revision which is used for finding the last change
+  set in the CVS tree.  Specify in SHA-1.
 
 * cvsroot
 
