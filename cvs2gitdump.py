@@ -58,7 +58,7 @@ def main():
     dump_all = False
     log_encoding = 'utf-8,iso-8859-1'
     rcs = RcsKeywords();
-    module = None
+    modules = []
     last_revision = None
 
     try:
@@ -77,7 +77,7 @@ def main():
 	    elif opt == '-k':
 		rcs.add_id_keyword(v)
 	    elif opt == '-m':
-		module = v
+		modules.append(v)
 	    elif opt == '-l':
 		last_revision = v
 	    elif opt == '-h':
@@ -130,9 +130,13 @@ def main():
 	else:
 	    last_author = last_author
 
-    cvs = CvsConv(cvsroot, rcs, module, not do_incremental)
+    cvs = CvsConv(cvsroot, rcs, not do_incremental)
     print >>sys.stderr, '** walk cvs tree'
-    cvs.walk()
+    if len(modules) == 0:
+	cvs.walk()
+    else:
+	for module in modules:
+	    cvs.walk(module)
 
     changesets = sorted(cvs.changesets)
     nchangesets = len(changesets)
@@ -268,18 +272,17 @@ class ChangeSetKey:
 	return hash(self.branch + '/' + self.author) * 31 + self.log_hash
 
 class CvsConv:
-    def __init__(self, cvsroot, rcs, module = None, dumpfile = False):
+    def __init__(self, cvsroot, rcs, dumpfile = False):
 	self.cvsroot = cvsroot
 	self.rcs = rcs
-	self.module = module
 	self.changesets = dict()
 	self.dumpfile = dumpfile
 	self.markseq = 0
 	self.tags = dict()
 
-    def walk(self):
+    def walk(self, module = None):
 	p = [self.cvsroot]
-	if self.module is not None: p.append(self.module)
+	if module is not None: p.append(module)
 	path = reduce(os.path.join, p)
 
 	for root, dirs, files in os.walk(path):
