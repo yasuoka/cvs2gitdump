@@ -161,8 +161,8 @@ def main():
 
 	# parse the first file to get log
 	finfo = k.revs[0]
-	rcsfile = rcsparse.rcsfile(finfo[2])
-	log = rcsparse.rcsfile(k.revs[0][2]).getlog(k.revs[0][0])
+	rcsfile = rcsparse.rcsfile(finfo.path)
+	log = rcsparse.rcsfile(k.revs[0].path).getlog(k.revs[0].rev)
 	for i, e in enumerate(log_encodings):
 	    try:
 		how = 'ignore' if i == len(log_encodings) - 1 else 'strict';
@@ -189,18 +189,18 @@ def main():
 	print revprops
 
 	for f in k.revs:
-	    rcsfile = rcsparse.rcsfile(f[2])
+	    rcsfile = rcsparse.rcsfile(f.path)
 	    fileprops = ''
-	    if os.access(f[2], os.X_OK):
+	    if os.access(f.path, os.X_OK):
 		fileprops += str_prop('svn:executable', '*')
 	    fileprops += 'PROPS-END\n'
-	    filecont = rcs.expand_keyword(f[2], f[0])
+	    filecont = rcs.expand_keyword(f.path, f.rev)
 
 	    md5sum = md5()
 	    md5sum.update(filecont)
 
-	    p = node_path(cvs.cvsroot, svnpath, f[2])
-	    if f[3] == 'dead':
+	    p = node_path(cvs.cvsroot, svnpath, f.path)
+	    if f.state == 'dead':
 		if not svn.exists(p):
 		    print >> sys.stderr, "Warning: remove '%s', but it does "\
 			"not exist." % (p)
@@ -233,6 +233,13 @@ def main():
 	raise Exception('could not find the last revision')
 
     print >>sys.stderr, '** dumped'
+
+class FileRevision:
+    def __init__(self, path, rev, state, markseq):
+	self.path = path
+	self.rev = rev
+	self.state = state
+	self.markseq = markseq
 
 class ChangeSetKey:
     def __init__(self, branch, author, time, log, commitid = None):
@@ -286,6 +293,9 @@ class ChangeSetKey:
 
     def __hash__(self):
 	return hash(self.branch + '/' + self.author) * 31 + self.log_hash
+
+    def put_file(self, path, rev, state, markseq):
+	self.revs.append(FileRevision(path, rev, state, markseq))
 
 class CvsConv:
     def __init__(self, cvsroot, rcs, dumpfile = False):
@@ -376,7 +386,7 @@ class CvsConv:
 		print >>sys.stderr, 'Aborted at %s %s' % (path, v[0])
 		raise e
 
-	    a.revs.append([k, p, path, v[3], self.markseq])
+	    a.put_file(path, k, v[3], self.markseq)
 	    while self.changesets.has_key(a):
 		c = self.changesets[a]
 		del self.changesets[a]
