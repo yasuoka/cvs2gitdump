@@ -189,8 +189,8 @@ def main():
 	print 'mark :%d' % (markseq)
 	email = k.author if email_domain is None \
 		else k.author + '@' + email_domain
-	print 'author %s <%s> %d +0000' % (k.author, email, k.max_time)
-	print 'committer %s <%s> %d +0000' % (k.author, email, k.max_time)
+	print 'author %s <%s> %d +0000' % (k.author, email, k.min_time)
+	print 'committer %s <%s> %d +0000' % (k.author, email, k.min_time)
 
 	print 'data', len(log)
 	print log,
@@ -254,7 +254,7 @@ class ChangeSetKey:
 	    # compare by the time
 	    ma = anon.min_time - self.max_time
 	    mi = self.min_time - anon.max_time
-	    ct = self.max_time - anon.max_time
+	    ct = self.min_time - anon.min_time
 	    if ma > self.fuzzsec or mi > self.fuzzsec:
 		return ct
 

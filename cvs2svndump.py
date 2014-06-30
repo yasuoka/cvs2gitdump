@@ -174,7 +174,7 @@ def main():
 	    email = k.author + '@' + email_domain
 
 	revprops = str_prop('svn:author', email)
-	revprops += str_prop('svn:date', svn_time(k.max_time))
+	revprops += str_prop('svn:date', svn_time(k.min_time))
 	revprops += str_prop('svn:log', log)
 	revprops += 'PROPS-END\n'
 
@@ -257,7 +257,7 @@ class ChangeSetKey:
 	    # compare by the time
 	    ma = anon.min_time - self.max_time
 	    mi = self.min_time - anon.max_time
-	    ct = self.max_time - anon.max_time
+	    ct = self.min_time - anon.min_time
 	    if ma > CHANGESET_FUZZ_SEC or mi > CHANGESET_FUZZ_SEC:
 		return ct
 
