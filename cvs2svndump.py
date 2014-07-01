@@ -150,7 +150,7 @@ def main():
     found_last_revision = False
     for i, k in enumerate(changesets):
 	if do_incremental and not found_last_revision:
-	    if k.max_time == svn.last_date and k.author == last_author:
+	    if k.min_time == svn.last_date and k.author == last_author:
 		found_last_revision = True
 	    continue
 	if k.max_time > max_time_max:

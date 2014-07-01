@@ -157,7 +157,7 @@ def main():
     extags = set()
     for k in changesets:
 	if do_incremental and not found_last_revision:
-	    if k.max_time == last_ctime and k.author == last_author:
+	    if k.min_time == last_ctime and k.author == last_author:
 		found_last_revision = True
 	    for tag in k.tags:
 		extags.add(tag)
