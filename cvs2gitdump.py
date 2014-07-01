@@ -102,7 +102,7 @@ def main():
     if len(args) == 2:
 	do_incremental = True
 	git = subprocess.Popen(['git', '--git-dir=' + args[1], 'log',
-	    '--max-count', '1', '--date=raw', '--format=%ce%n%cd%n%H',
+	    '--max-count', '1', '--date=raw', '--format=%ae%n%cd%n%H',
 	    git_branch], stdout=subprocess.PIPE)
 	outs = git.stdout.readlines()
 	git.wait()
