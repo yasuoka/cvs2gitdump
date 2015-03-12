@@ -33,9 +33,10 @@ Usage
 
 * -a
 
-  As the default the script will not use the changes in the last 10
-  minutes because they are not stable if the repository is changing.
-  This option will change this behavior, it will use the entire changes.
+  As the default the script will only use commits 10 minutes older than
+  the most recent commit because recent commits may not stable if the
+  repository is changing.  This option will change this behavior, it
+  will use the entire commits.
 
 * -b branch
 
@@ -132,9 +133,10 @@ Usage
 
 * -a
 
-  As the default the script will not use the changes in the last 10
-  minutes because they are not stable if the repository is changing.
-  This option will change this behavior, it will use the entire changes.
+  As the default the script will only use commits 10 minutes older than
+  the most recent commit because recent commits may not stable if the
+  repository is changing.  This option will change this behavior, it
+  will use the entire commits.
 
 * -h
 
