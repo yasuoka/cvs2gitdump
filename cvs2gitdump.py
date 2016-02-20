@@ -78,6 +78,9 @@ def main():
 	    elif opt == '-k':
 		rcs.add_id_keyword(v)
 	    elif opt == '-m':
+		if v == '.git':
+		    print >>sys.stderr, 'Cannot handle the path named \'.git\''
+		    sys.exit(1)
 		modules.append(v)
 	    elif opt == '-l':
 		last_revision = v
@@ -299,6 +302,14 @@ class CvsConv:
 	path = reduce(os.path.join, p)
 
 	for root, dirs, files in os.walk(path):
+	    if '.git' in dirs:
+		print >>sys.stderr, 'Ignore %s: cannot handle the path ' \
+		    'named \'.git\'' % root + os.sep + '.git'
+		dirs.remove('.git')
+	    if '.git' in files:
+		print >>sys.stderr, 'Ignore %s: cannot handle the path ' \
+		    'named \'.git\'' % root + os.sep + '.git'
+		files.remove('.git')
 	    for f in files:
 		if not f[-2:] == ',v': continue
 		self.parse_file(root + os.sep + f)
