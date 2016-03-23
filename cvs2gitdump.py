@@ -304,11 +304,11 @@ class CvsConv:
 	for root, dirs, files in os.walk(path):
 	    if '.git' in dirs:
 		print >>sys.stderr, 'Ignore %s: cannot handle the path ' \
-		    'named \'.git\'' % root + os.sep + '.git'
+		    'named \'.git\'' % (root + os.sep + '.git')
 		dirs.remove('.git')
 	    if '.git' in files:
 		print >>sys.stderr, 'Ignore %s: cannot handle the path ' \
-		    'named \'.git\'' % root + os.sep + '.git'
+		    'named \'.git\'' % (root + os.sep + '.git')
 		files.remove('.git')
 	    for f in files:
 		if not f[-2:] == ',v': continue
