@@ -6,8 +6,8 @@ A small python script which imports cvs tree into git repository.
 Pros:
 - Small footprint
 - Supports incremental import.  It's very fast
-- Convert tags on HEAD
-- Everythings is done on memory
+- Converts tags on HEAD
+- Everything is done on memory
 
 Cons:
 - Doesn't convert any branches
@@ -17,7 +17,7 @@ An alternative to
 - [bigcvs2git](https://github.com/jcs/bigcvs2git)
 - [cvs2svn](http://cvs2svn.tigris.org/)
 
-Prerequirement:
+Prerequisite:
 - [rcsparse](http://gitorious.org/fromcvs/rcsparse)
 
 
