@@ -1,0 +1,78 @@
+.Dd August 1, 2016
+.Dt CVS2SVNDUMP 1
+.Os
+.Sh NAME
+.Nm cvs2svndump
+.Nd imports a cvs tree into a subversion repository
+.Sh SYNOPSIS
+.Nm
+.Op Fl ah
+.Op Fl z Ar fuzz
+.Op Fl e Ar email_domain
+.Op Fl E Ar log_encodings
+.Op Fl k Ar rcs_keywords
+.Op Fl m Ar module
+.Ar cvsroot
+.Op Ar svnroot svnpath
+.Sh DESCRIPTION
+.Nm
+is a small python script which imports a cvs tree into a subversion repository.
+.Nm
+has a small footprint and supports incremental imports. It's very fast because
+the conversion is done on memory.
+.Pp
+Options:
+.Bl -tag -width Ds
+.It Fl a
+By default, the script will only use commits 10 minutes older than the most
+recent commit because recent commits are not stable if the repository is
+changing. This option will change this behavior. It will use all the commits.
+.It Fl h
+Show the usage.
+.It Fl z Ar fuzz
+When the script collects changesets from the CVS repository, commits by the
+same author, using the same log message and within fuzz seconds are collected
+into the same changeset. 300 (seconds) is used as default.
+.It Fl e Ar email_domain
+Append the email domain to the author field.
+.It Fl E Ar log_encodings
+Specify the character encodings used for decoding CVS logs. Multiple encodings
+can be specified by separating with ','. Specified encodings are used in order
+for decoding the log. Default is 'utf-8,iso-8859-1'
+.It Fl k Ar rcs_keywords
+Add an extra RCS keyword which are used by CVS. The script substitutes the RCS
+keyword by the same way as $Id$.
+.It Fl m Ar module
+Specify the target module name in the target cvsroot. The script will dump only
+the directory specified by this option.
+.It Ar cvsroot
+The target cvsroot or the sub directory of the cvsroot. The script treats this
+directory as the root directory.
+.It Ar svn_dir svn_path
+Specify the svn repository and path. Specify these for incremental import. When
+the script searches the last commit, it excepts the commits whose author
+are 'svnadmin'. Use 'svnadmin' for manually fixing.
+.El
+.Sh EXAMPLES
+First import:
+.Bd -literal
+$ cvs2svndump -k OpenBSD /cvs/openbsd/src > openbsd.dump
+$ svnadmin create /svnrepo
+$ svn mkdir --parents -m 'mkdir /vendor/openbsd/head/src' \(rs
+    file:///svnrepo/vendor/openbsd/head/src
+$ svnadmin load --parent-dir /vendor/openbsd/head/src \(rs
+    /svnrepo < openbsd.dump
+.Ed
+.Pp
+Periodic import:
+.Bd -literal
+$ cvsync
+$ cvs2svndump -k OpenBSD /cvs/openbsd/src file:///svnrepo \(rs
+    vendor/openbsd/head/src > openbsd2.dump
+$ svnadmin load /svnrepo < openbsd2.dump
+.Ed
+.Sh AUTHORS
+.An YASUOKA Masahiko.
+.Sh CAVEATS
+.Nm
+doesn't convert tags and branches.

@@ -1,0 +1,81 @@
+.Dd August 1, 2016
+.Dt CVS2GITDUMP 1
+.Os
+.Sh NAME
+.Nm cvs2gitdump
+.Nd imports a cvs tree into a git repository
+.Sh SYNOPSIS
+.Nm
+.Op Fl ah
+.Op Fl z Ar fuzz
+.Op Fl e Ar email_domain
+.Op Fl E Ar log_encodings
+.Op Fl k Ar rcs_keywords
+.Op Fl b Ar branch
+.Op Fl m Ar module
+.Op Fl l Ar last_revision
+.Ar cvsroot
+.Op Ar git_dir
+.Sh DESCRIPTION
+.Nm
+is a small python script which imports a cvs tree into a git repository.
+.Nm
+has a small footprint, supports incremental imports and converts tags to HEAD.
+It's very fast because the conversion is done on memory.
+.Pp
+Options:
+.Bl -tag -width Ds
+.It Fl a
+By default, the script will only use commits 10 minutes older than the most
+recent commit because recent commits are not stable if the repository is
+changing. This option will change this behavior. It will use all the commits.
+.It Fl b Ar branch
+The git branch which is used for incremental import.
+.It Fl h
+Show the usage.
+.It Fl z Ar fuzz
+When the script collects changesets from the CVS repository, commits by the
+same author, using the same log message and within fuzz seconds are collected
+into the same changeset. 300 (seconds) is used as default.
+.It Fl e Ar email_domain
+Append the email domain to the author field.
+.It Fl E Ar log_encodings
+Specify the character encodings used for decoding CVS logs. Multiple encodings
+can be specified by separating with ','. Specified encodings are used in order
+for decoding the log. Default is 'utf-8,iso-8859-1'
+.It Fl k Ar rcs_keywords
+Add an extra RCS keyword which are used by CVS. The script substitutes the RCS
+keyword by the same way as $Id$.
+.It Fl m Ar module
+Specify the target module name in the target cvsroot. The script will dump only
+the directory specified by this option.
+.It Fl l Ar last_revision
+Specify the last SHA-1 revision which is used for finding the last change set
+in the CVS tree.
+.It Ar cvsroot
+The target cvsroot or the sub directory of the cvsroot. The script treats this
+directory as the root directory.
+.It Ar git_dir
+The git repository. Specify this for incremental import.
+.El
+.Sh EXAMPLES
+First import:
+.Bd -literal
+$ git init --bare /git/openbsd.git
+$ cvs2gitdump -k OpenBSD -e openbsd.org \(rs
+    /cvs/openbsd/src > openbsd.dump
+$ git --git-dir /git/openbsd.git fast-import < openbsd.dump
+.Ed
+.Pp
+Periodic import:
+.Bd -literal
+$ cvsync
+$ cvs2gitdump -k OpenBSD -e openbsd.org /cvs/openbsd/src \(rs
+    /git/openbsd.git > openbsd2.dump
+$ git --git-dir /git/openbsd.git fast-import < openbsd2.dump
+.Ed
+.Sh AUTHORS
+.An YASUOKA Masahiko.
+.Sh CAVEATS
+.Nm
+doesn't convert branches.
