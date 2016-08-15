@@ -7,7 +7,7 @@ Pros:
 - Small footprint
 - Supports incremental import.  It's very fast
 - Converts tags on HEAD
-- Everything is done on memory
+- Everything is done in memory
 
 Cons:
 - Doesn't convert any branches
@@ -112,7 +112,7 @@ A small python script which imports cvs tree into subversion repository.
 Pros:
 - Small footprint
 - Supports incremental import is supported.  It's very fast
-- Everythings is done on memory
+- Everythings is done in memory
 
 Cons:
 - Doesn't convert tags and branches
