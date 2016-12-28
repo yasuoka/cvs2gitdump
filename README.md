@@ -14,7 +14,6 @@ Cons:
 
 An alternative to
 - [git-cvs](https://github.com/ustuehler/git-cvs)
-- [bigcvs2git](https://github.com/jcs/bigcvs2git)
 - [cvs2svn](http://cvs2svn.tigris.org/)
 
 Prerequisite:
