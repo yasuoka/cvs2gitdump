@@ -131,7 +131,7 @@ def main():
 
     svn.dump = True
 
-    changesets = sorted(cvs.changesets)
+    changesets = sorted(cvs.changesets, lambda a,b: a.full_compare(b, False))
     nchangesets = len(changesets)
     print >>sys.stderr, '** cvs has %d changeset' % (nchangesets)
 
@@ -257,6 +257,9 @@ class ChangeSetKey:
         self.log_hash = h
 
     def __cmp__(self, anot):
+        return self.full_compare(anot, True)
+
+    def full_compare(self, anot, quick):
         if isinstance(anot, ChangeSetKey):
 
             # compare by the commitid
@@ -274,15 +277,29 @@ class ChangeSetKey:
 
             if cid != 0:
                 # only one has the commitid, this means different commit
-                return cid if ct == 0 else ct
+                c = cid
+                pass
+            else:
+                # compare by log, branch and author
+                c = cmp(self.log_hash, anot.log_hash)
+                if c == 0: c = cmp(self.branch, anot.branch)
+                if c == 0: c = cmp(self.author, anot.author)
+                if c == 0:
+                    return 0
 
-            # compare by log, branch and author
-            c = cmp(self.log_hash, anot.log_hash)
-            if c == 0: c = cmp(self.branch, anot.branch)
-            if c == 0: c = cmp(self.author, anot.author)
-            if c == 0:
-                return 0
-            return ct if ct != 0 else c
+            if ct != 0:
+                return ct
+
+            #
+            # If the both had been happend on the same time and changed a same
+            # file, the order should be determined by the revision of the file.
+            #
+            if not quick:
+                for reva in self.revs:
+                    for revb in anot.revs:
+                        if reva.path == revb.path:
+                            return stralnumcmp(reva.rev, revb.rev)
+            return c
 
         return -1
 
@@ -680,6 +697,25 @@ class RcsKeywords:
                 logbuf = ''
         return s[:-1]
 
+stralnumcmp_re = re.compile(r'((\d+)|(\D+))')
+
+def stralnumcmp(a0, b0):
+    a = a0
+    b = b0
+
+    while len(a) > 0 and len(b) > 0:
+        m_a = stralnumcmp_re.match(a)
+        m_b = stralnumcmp_re.match(b)
+        if m_a.group(2) and m_b.group(2):
+            c = cmp(int(m_a.group(2)), int(m_b.group(2)))
+        else:
+            c = cmp(m_a.group(3), m_b.group(3))
+        if c != 0:
+            return c;
+        a = a[m_a.end(1):]
+        b = b[m_b.end(1):]
+
+    return len(a0) - len(b0)
 # ----------------------------------------------------------------------
 # entry point
 # ----------------------------------------------------------------------
