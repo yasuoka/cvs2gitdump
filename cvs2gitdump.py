@@ -245,19 +245,19 @@ class ChangeSetKey:
             h = 31 * h + ord(c)
         self.log_hash = h
 
-    def __cmp__(self, anon):
-        if isinstance(anon, ChangeSetKey):
+    def __cmp__(self, anot):
+        if isinstance(anot, ChangeSetKey):
 
             # compare by the commitid
-            cid = cmp(self.commitid, anon.commitid)
+            cid = cmp(self.commitid, anot.commitid)
             if cid == 0 and self.commitid is not None:
                 # both have commitid and they are same
                 return 0
 
             # compare by the time
-            ma = anon.min_time - self.max_time
-            mi = self.min_time - anon.max_time
-            ct = self.min_time - anon.min_time
+            ma = anot.min_time - self.max_time
+            mi = self.min_time - anot.max_time
+            ct = self.min_time - anot.min_time
             if ma > self.fuzzsec or mi > self.fuzzsec:
                 return ct
 
@@ -266,19 +266,19 @@ class ChangeSetKey:
                 return cid if ct == 0 else ct
 
             # compare by log, branch and author
-            c = cmp(self.log_hash, anon.log_hash)
-            if c == 0: c = cmp(self.branch, anon.branch)
-            if c == 0: c = cmp(self.author, anon.author)
+            c = cmp(self.log_hash, anot.log_hash)
+            if c == 0: c = cmp(self.branch, anot.branch)
+            if c == 0: c = cmp(self.author, anot.author)
             if c == 0:
                 return 0
             return ct if ct != 0 else c
 
         return -1
 
-    def merge(self, anon):
-        self.max_time = max(self.max_time, anon.max_time)
-        self.min_time = min(self.min_time, anon.min_time)
-        self.revs.extend(anon.revs)
+    def merge(self, anot):
+        self.max_time = max(self.max_time, anot.max_time)
+        self.min_time = min(self.min_time, anot.min_time)
+        self.revs.extend(anot.revs)
 
     def __hash__(self):
         return hash(self.branch + '/' + self.author) * 31 + self.log_hash
