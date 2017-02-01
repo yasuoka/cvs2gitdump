@@ -285,6 +285,9 @@ class ChangeSetKey:
                 for reva in self.revs:
                     for revb in anot.revs:
                         if reva.path == revb.path:
+                            print >>sys.stderr, '==> %s %s' % (\
+                                reva.path, time.strftime("%Y/%m/%d %H:%M:%S ",\
+                                    time.gmtime(self.min_time)))
                             return stralnumcmp(reva.rev, revb.rev)
             return c
 
