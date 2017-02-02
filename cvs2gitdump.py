@@ -30,8 +30,6 @@
 #   % git --git-dir /git/openbsd.git fast-import < openbsd2.dump
 #
 
-# $Id$
-
 import getopt
 import os
 import rcsparse

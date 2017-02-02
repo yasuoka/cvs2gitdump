@@ -32,8 +32,6 @@
 #   % svnadmin load /svnrepo < openbsd2.dump
 #
 
-# $Id$
-
 import getopt
 import os
 import rcsparse
