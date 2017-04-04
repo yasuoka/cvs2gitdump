@@ -129,8 +129,6 @@ def main():
         if do_incremental and email_domain is not None and \
                 last_author.lower().endswith(('@' + email_domain).lower()):
             last_author = last_author[:-1 * (1 + len(email_domain))]
-        else:
-            last_author = last_author
 
     cvs = CvsConv(cvsroot, rcs, not do_incremental, fuzzsec)
     print >>sys.stderr, '** walk cvs tree'
