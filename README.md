@@ -15,6 +15,7 @@ Cons:
 An alternative to
 - [git-cvs](https://github.com/ustuehler/git-cvs)
 - [cvs2svn](http://cvs2svn.tigris.org/)
+- [cvs-fast-export](http://www.catb.org/~esr/cvs-fast-export/cvs-fast-export.html)
 
 Prerequisite:
 - [rcsparse](http://gitorious.org/fromcvs/rcsparse)
