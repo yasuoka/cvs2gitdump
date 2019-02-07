@@ -306,6 +306,10 @@ class CvsConv:
                 print >>sys.stderr, 'Ignore %s: cannot handle the path ' \
                     'named \'.git\'' % (root + os.sep + '.git')
                 files.remove('.git')
+            if '.gitignore' in files:
+                print >>sys.stderr, 'Ignore %s: cannot handle the path ' \
+                    'named \'.gitignore\'' % (root + os.sep + '.gitignore')
+                files.remove('.gitignore')
             for f in files:
                 if not f[-2:] == ',v': continue
                 self.parse_file(root + os.sep + f)
