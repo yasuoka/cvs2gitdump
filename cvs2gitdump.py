@@ -236,7 +236,7 @@ class ChangeSetKey:
         self.log_hash = 0
         h = 0
         for c in log:
-            h = 31 * h + ord(c)
+            h = 31 * h + c
         self.log_hash = h
 
     def __lt__(self, other):
