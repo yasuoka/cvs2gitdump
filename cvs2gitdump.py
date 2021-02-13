@@ -345,7 +345,7 @@ class CvsConv:
 
         # sort by time and revision
         revs = sorted(list(rcsfile.revs.items()), \
-                lambda a,b: cmp(a[1][1], b[1][1]) or cmp(b[1][0], a[1][0]))
+            key=lambda a: (a[1][1], a[1][0]))
         p = '0'
         novendor = False
         have_initial_revision = False
