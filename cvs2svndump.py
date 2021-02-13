@@ -42,7 +42,6 @@ import time
 
 from hashlib import md5
 from svn import core, fs, delta, repos
-from functools import reduce
 
 CHANGESET_FUZZ_SEC = 300
 
@@ -324,7 +323,7 @@ class CvsConv:
     def walk(self, module = None):
         p = [self.cvsroot]
         if module is not None: p.append(module)
-        path = reduce(os.path.join, p)
+        path = os.path.join(*p)
 
         for root, dirs, files in os.walk(path):
             for f in files:
@@ -345,8 +344,7 @@ class CvsConv:
             if len(r) == 3:
                 branches[v] = 'VENDOR'
             elif len(r) >= 3 and r[-2] == '0':
-                z = reduce(lambda a, b: a + '.' + b, r[:-2] + r[-1:])
-                branches[reduce(lambda a, b: a + '.' + b, r[:-2] + r[-1:])] = k
+                branches['.'.join(r[:-2] + r[-1:])] = k
             if len(r) == 2 and branches[r[0]] == 'HEAD':
                 if v not in rtags:
                     rtags[v] = list()
@@ -393,7 +391,7 @@ class CvsConv:
             if self.dumpfile:
                 self.markseq = self.markseq + 1
 
-            b = reduce(lambda a, b: a + '.' + b, r[:-1])
+            b = '.'.join(r[:-1])
             try:
                 a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
                         v[6], self.fuzzsec)
