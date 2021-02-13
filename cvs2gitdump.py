@@ -240,35 +240,45 @@ class ChangeSetKey:
             h = 31 * h + ord(c)
         self.log_hash = h
 
-    def __cmp__(self, anot):
-        if isinstance(anot, ChangeSetKey):
+    def __lt__(self, other):
+        return self._cmp(other, False) < 0
+    def __gt__(self, other):
+        return self._cmp(other, False) > 0
+    def __eq__(self, other):
+        return self._cmp(other, False) == 0
+    def __le__(self, other):
+        return self._cmp(other, False) <= 0
+    def __ge__(self, other):
+        return self._cmp(other, False) >= 0
+    def __ne__(self, other):
+        return self._cmp(other, False) != 0
 
-            # compare by the commitid
-            cid = cmp(self.commitid, anot.commitid)
-            if cid == 0 and self.commitid is not None:
-                # both have commitid and they are same
-                return 0
+    def _cmp(obja, objb, quick):
+        # compare by the commitid
+        cid = _cmp2(obja.commitid, objb.commitid)
+        if cid == 0 and self.commitid is not None:
+            # both have commitid and they are same
+            return 0
 
-            # compare by the time
-            ma = anot.min_time - self.max_time
-            mi = self.min_time - anot.max_time
-            ct = self.min_time - anot.min_time
-            if ma > self.fuzzsec or mi > self.fuzzsec:
-                return ct
+        # compare by the time
+        ma = objb.min_time - obja.max_time
+        mi = obja.min_time - objb.max_time
+        ct = obja.min_time - objb.min_time
+        if ma > obja.fuzzsec or mi > obja.fuzzsec:
+            return ct
 
-            if cid != 0:
-                # only one has the commitid, this means different commit
-                return cid if ct == 0 else ct
+        if cid != 0:
+            # only one has the commitid, this means different commit
+            return cid if ct == 0 else ct
 
-            # compare by log, branch and author
-            c = cmp(self.log_hash, anot.log_hash)
-            if c == 0: c = cmp(self.branch, anot.branch)
-            if c == 0: c = cmp(self.author, anot.author)
-            if c == 0:
-                return 0
-            return ct if ct != 0 else c
+        # compare by log, branch and author
+        c = _cmp2(obja.log_hash, objb.log_hash)
+        if c == 0: c = _cmp2(obja.branch, objb.branch)
+        if c == 0: c = _cmp2(obja.author, objb.author)
+        if c == 0:
+            return 0
 
-        return -1
+        return ct if ct != 0 else c
 
     def merge(self, anot):
         self.max_time = max(self.max_time, anot.max_time)
@@ -280,6 +290,11 @@ class ChangeSetKey:
 
     def put_file(self, path, rev, state, markseq):
         self.revs.append(FileRevision(path, rev, state, markseq))
+
+def _cmp2(a, b):
+    _a = a is not None
+    _b = b is not None
+    return (a > b) - (a < b) if _a and _b else (_a > _b) - (_a < _b)
 
 class CvsConv:
     def __init__(self, cvsroot, rcs, dumpfile, fuzzsec):
