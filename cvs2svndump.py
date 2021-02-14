@@ -231,6 +231,24 @@ def main():
 
     print('** dumped', file=sys.stderr)
 
+#
+# Write string objects to stdout with the code decided by Python.
+# Also write byte objects in raw, without any code conversion (file
+# bodies might be various encoding).
+#
+def output(*args, end='\n'):
+    if len(args) == 0:
+        pass
+    elif len(args) > 1 or isinstance(args[0], str):
+        lines = ' '.join(
+            [arg if isinstance(arg, str) else str(arg) for arg in args])
+        sys.stdout.write(lines)
+    else:
+        sys.stdout.buffer.write(args[0])
+    if len(end) > 0:
+        sys.stdout.write(end)
+    sys.stdout.flush()
+
 class FileRevision:
     def __init__(self, path, rev, state, markseq):
         self.path = path
@@ -611,19 +629,28 @@ class RcsKeywords:
         if (mode & (self.RCS_KWEXP_NONE | self.RCS_KWEXP_OLD)) != 0:
             return rcs.checkout(rev[0])
 
-        s = logbuf = ''
-        for line in rcs.checkout(rev[0]).split('\n'):
-            while True:
+        ret = b''
+        for line0 in rcs.checkout(rev[0]).split(b'\n'):
+            logbuf = None
+            line = None
+            try:
+                line = line0.decode('ascii')
                 m = self.re_kw.match(line)
-                if m is None:
-                    break
+            except:
+                pass
+            if line is None or m is None:
+                # No RCS Keywords, use it as it is
+                ret += line0 + b'\n'
+                continue
+
+            while m is not None:
                 try:
                     dsign = m.end(1) + line[m.end(1):].index('$')
                 except:
-                    braek;
+                    break
                 prefix = line[:m.start(1)-1]
                 line = line[dsign + 1:]
-                s += prefix
+                ret += prefix.encode('ascii')
                 expbuf = ''
                 if (mode & self.RCS_KWEXP_NAME) != 0:
                     expbuf += '$'
@@ -654,24 +681,23 @@ class RcsKeywords:
                         expbuf += rev[3]
                         expbuf += " "
                     if (expkw & self.RCS_KW_LOG) != 0:
-                        p = prefix
+                        p = prefix.encode('ascii')
                         expbuf += filename \
                                 if (expkw & self.RCS_KW_FULLPATH) != 0 \
                                 else os.path.basename(filename)
                         expbuf += " "
-                        logbuf += '%sRevision %s  ' % (p, rev[0])
-                        logbuf += time.strftime("%Y/%m/%d %H:%M:%S  ",\
-                                time.gmtime(rev[1]))
-                        logbuf += rev[2] + '\n'
-                        for lline in rcs.getlog(rev[0]).rstrip().split('\n'):
-                            if lline == '':
-                                logbuf += p.rstrip() + '\n'
+                        logbuf = p + ('Revision %s  %s  %s\n' % (
+                            rev[0], time.strftime("%Y/%m/%d %H:%M:%S",
+                            time.gmtime(rev[1])), rev[2])).encode('ascii')
+                        for lline in rcs.getlog(rev[0]).rstrip().split(b'\n'):
+                            if len(lline) == 0:
+                                logbuf += p.rstrip() + b'\n'
                             else:
-                                logbuf += p + lline.lstrip() +  '\n'
-                        if line == '':
-                            logbuf += p.rstrip() + '\n'
+                                logbuf += p + lline.lstrip() +  b'\n'
+                        if len(line) == 0:
+                            logbuf += p.rstrip() + b'\n'
                         else:
-                            logbuf += p + line.lstrip() +  '\n'
+                            logbuf += p + line.lstrip() +  b'\n'
                         line = ''
                     if (expkw & self.RCS_KW_SOURCE) != 0:
                         expbuf += filename
@@ -680,12 +706,13 @@ class RcsKeywords:
                         expbuf += " "
                 if (mode & self.RCS_KWEXP_NAME) != 0:
                     expbuf += '$'
-                s += expbuf[:255]
-            s += line + '\n'
-            if len(logbuf) > 0:
-                s += logbuf
-                logbuf = ''
-        return s[:-1]
+                ret += expbuf[:255].encode('ascii')
+                m = self.re_kw.match(line)
+
+            ret += (line + '\n').encode('ascii')
+            if logbuf is not None:
+                ret += logbuf
+        return ret[:-1]
 
 # ----------------------------------------------------------------------
 # entry point
