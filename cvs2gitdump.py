@@ -34,7 +34,6 @@ import getopt
 import os
 import rcsparse
 import re
-import string
 import subprocess
 import sys
 import time
@@ -401,7 +400,7 @@ def node_path(r,n,p):
     path = p[:-2]
     p = path.split('/')
     if len(p) > 0 and p[-2] == 'Attic':
-        path = string.join(p[:-2], '/') + '/' + p[-1]
+        path = os.path.join(*p[:-2] + [p[-1]])
     if path.startswith(r):
         path = path[len(r) + 1:]
     if n is None or len(n) == 0:
