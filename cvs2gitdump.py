@@ -181,18 +181,18 @@ def main():
                 pass
         log = log.encode('utf-8', 'ignore')
 
-        print('commit refs/heads/' + git_branch)
+        output('commit refs/heads/' + git_branch)
         markseq = markseq + 1
-        print('mark :%d' % (markseq))
+        output('mark :%d' % (markseq))
         email = k.author if email_domain is None \
                 else k.author + '@' + email_domain
-        print('author %s <%s> %d +0000' % (k.author, email, k.min_time))
-        print('committer %s <%s> %d +0000' % (k.author, email, k.min_time))
+        output('author %s <%s> %d +0000' % (k.author, email, k.min_time))
+        output('committer %s <%s> %d +0000' % (k.author, email, k.min_time))
 
-        print('data', len(log))
-        print(log, end=' ')
+        output('data', len(log))
+        output(log, end='')
         if do_incremental and git_tip is not None:
-            print('from', git_tip)
+            output('from', git_tip)
             git_tip = None
 
         for m in marks:
@@ -200,16 +200,16 @@ def main():
             mode = 0o100755 if os.access(f.path, os.X_OK) else 0o100644
             fn = node_path(cvs.cvsroot, None, f.path) # XXX
             if f.state == 'dead':
-                print('D', fn)
+                output('D', fn)
             else:
-                print('M %o :%d %s' % (mode, m, fn))
-        print('')
+                output('M %o :%d %s' % (mode, m, fn))
+        output('')
         for tag in k.tags:
             if tag in extags:
                 continue
-            print('reset refs/tags/%s' % (tag))
-            print('from :%d' % (markseq))
-            print('')
+            output('reset refs/tags/%s' % (tag))
+            output('from :%d' % (markseq))
+            output('')
 
     if do_incremental and not found_last_revision:
         raise Exception('could not find the last revision')
@@ -446,10 +446,10 @@ def git_dump_file(path, k, rcs, markseq):
         print('unlimit the resource limit may fix ' \
                 'this problem.', file=sys.stderr)
         sys.exit(1)
-    print('blob')
-    print('mark :%d' % markseq)
-    print('data', len(cont))
-    print(cont)
+    output('blob')
+    output('mark :%d' % markseq)
+    output('data', len(cont))
+    output(cont)
 
 class RcsKeywords:
     RCS_KW_AUTHOR   = (1 << 0)
