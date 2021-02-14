@@ -34,14 +34,14 @@
 
 import getopt
 import os
-import rcsparse
 import re
-import subprocess
 import sys
 import time
 
 from hashlib import md5
+
 from svn import core, fs, delta, repos
+import rcsparse
 
 CHANGESET_FUZZ_SEC = 300
 
@@ -141,7 +141,7 @@ def main():
     printOnce = False
 
     found_last_revision = False
-    for i, k in enumerate(changesets):
+    for chg_idx, k in enumerate(changesets):
         if do_incremental and not found_last_revision:
             if k.min_time == svn.last_date and k.author == last_author:
                 found_last_revision = True
@@ -176,7 +176,7 @@ def main():
         revprops += str_prop('svn:log', log)
         revprops += 'PROPS-END\n'
 
-        output('Revision-number: %d' % (i + 1))
+        output('Revision-number: %d' % (chg_idx + 1))
         output('Prop-content-length: %d' % (len(revprops)))
         output('Content-length: %d' % (len(revprops)))
         output('')
@@ -205,7 +205,7 @@ def main():
                 output('')
                 svn.remove(p)
                 continue
-            elif not svn.exists(p):
+            if not svn.exists(p):
                 svn.add(p)
                 output('Node-path: %s' % (p))
                 output('Node-kind: file')
@@ -255,11 +255,11 @@ class FileRevision:
         self.markseq = markseq
 
 class ChangeSetKey:
-    def __init__(self, branch, author, time, log, commitid, fuzzsec):
+    def __init__(self, branch, author, timestamp, log, commitid, fuzzsec):
         self.branch = branch
         self.author = author
-        self.min_time = time
-        self.max_time = time
+        self.min_time = timestamp
+        self.max_time = timestamp
         self.commitid = commitid
         self.fuzzsec = fuzzsec
         self.revs = []
@@ -271,30 +271,30 @@ class ChangeSetKey:
         self.log_hash = h
 
     def __lt__(self, other):
-        return self._cmp(other, False) < 0
+        return self._cmp(other) < 0
     def __gt__(self, other):
-        return self._cmp(other, False) > 0
+        return self._cmp(other) > 0
     def __eq__(self, other):
-        return self._cmp(other, False) == 0
+        return self._cmp(other) == 0
     def __le__(self, other):
-        return self._cmp(other, False) <= 0
+        return self._cmp(other) <= 0
     def __ge__(self, other):
-        return self._cmp(other, False) >= 0
+        return self._cmp(other) >= 0
     def __ne__(self, other):
-        return self._cmp(other, False) != 0
+        return self._cmp(other) != 0
 
-    def _cmp(obja, objb, quick):
+    def _cmp(self, anon):
         # compare by the commitid
-        cid = _cmp2(obja.commitid, objb.commitid)
+        cid = _cmp2(self.commitid, anon.commitid)
         if cid == 0 and self.commitid is not None:
             # both have commitid and they are same
             return 0
 
         # compare by the time
-        ma = objb.min_time - obja.max_time
-        mi = obja.min_time - objb.max_time
-        ct = obja.min_time - objb.min_time
-        if ma > obja.fuzzsec or mi > obja.fuzzsec:
+        ma = anon.min_time - self.max_time
+        mi = self.min_time - anon.max_time
+        ct = self.min_time - anon.min_time
+        if ma > self.fuzzsec or mi > self.fuzzsec:
             return ct
 
         if cid != 0:
@@ -302,9 +302,11 @@ class ChangeSetKey:
             return cid if ct == 0 else ct
 
         # compare by log, branch and author
-        c = _cmp2(obja.log_hash, objb.log_hash)
-        if c == 0: c = _cmp2(obja.branch, objb.branch)
-        if c == 0: c = _cmp2(obja.author, objb.author)
+        c = _cmp2(self.log_hash, anon.log_hash)
+        if c == 0:
+            c = _cmp2(self.branch, anon.branch)
+        if c == 0:
+            c = _cmp2(self.author, anon.author)
         if c == 0:
             return 0
 
@@ -336,26 +338,28 @@ class CvsConv:
         self.tags = dict()
         self.fuzzsec = fuzzsec
 
-    def walk(self, module = None):
+    def walk(self, module=None):
         p = [self.cvsroot]
-        if module is not None: p.append(module)
+        if module is not None:
+            p.append(module)
         path = os.path.join(*p)
 
-        for root, dirs, files in os.walk(path):
+        for root, _, files in os.walk(path):
             for f in files:
-                if not f[-2:] == ',v': continue
+                if not f[-2:] == ',v':
+                    continue
                 self.parse_file(root + os.sep + f)
 
-        for t,c in list(self.tags.items()):
+        for t, c in list(self.tags.items()):
             c.tags.append(t)
 
     def parse_file(self, path):
         rtags = dict()
-        rcsfile=rcsparse.rcsfile(path)
+        rcsfile = rcsparse.rcsfile(path)
         path_related = path[len(self.cvsroot) + 1:][:-2]
-        branches = {'1': 'HEAD', '1.1.1': 'VENDOR' }
+        branches = {'1': 'HEAD', '1.1.1': 'VENDOR'}
         have_111 = False
-        for k,v in list(rcsfile.symbols.items()):
+        for k, v in list(rcsfile.symbols.items()):
             r = v.split('.')
             if len(r) == 3:
                 branches[v] = 'VENDOR'
@@ -373,7 +377,7 @@ class CvsConv:
         novendor = False
         have_initial_revision = False
         last_vendor_status = None
-        for k,v in revs:
+        for k, v in revs:
             r = k.split('.')
             if len(r) == 4 and r[0] == '1' and r[1] == '1' and r[2] == '1' \
                     and r[3] == '1':
@@ -409,8 +413,9 @@ class CvsConv:
 
             b = '.'.join(r[:-1])
             try:
-                a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
-                        v[6], self.fuzzsec)
+                a = ChangeSetKey(
+                    branches[b], v[2], v[1], rcsfile.getlog(v[0]), v[6],
+                    self.fuzzsec)
             except Exception as e:
                 print('Aborted at %s %s' % (path, v[0]), file=sys.stderr)
                 raise e
@@ -429,7 +434,7 @@ class CvsConv:
                             self.tags[t].max_time < a.max_time:
                         self.tags[t] = a
 
-def node_path(r,n,p):
+def node_path(r, n, p):
     if r.endswith('/'):
         r = r[:-1]
     path = p[:-2]               # drop ",v"
@@ -442,11 +447,10 @@ def node_path(r,n,p):
         return path
     return '%s/%s' % (n, path)
 
-def str_prop(k,v):
+def str_prop(k, v):
     return 'K %d\n%s\nV %d\n%s\n' % (len(k), k, len(v), v)
 
 def svn_time(t):
-    import time
     return time.strftime("%Y-%m-%dT%H:%M:%S.000000Z", time.gmtime(t))
 
 class SvnDumper:
@@ -517,8 +521,8 @@ class SvnDumper:
         root = fs.revision_root(fs_ptr, rev)
         hist = fs.node_history(root, self.root)
         while hist is not None:
-            hist = fs.history_prev(hist,0)
-            dummy,rev = fs.history_location(hist)
+            hist = fs.history_prev(hist, 0)
+            dummy, rev = fs.history_location(hist)
             d = fs.revision_prop(fs_ptr, rev, core.SVN_PROP_REVISION_DATE)
             author = fs.revision_prop(fs_ptr, rev, \
                     core.SVN_PROP_REVISION_AUTHOR)
@@ -531,8 +535,9 @@ class SvnDumper:
                 return 1
             editor = SvnDumperEditor(self)
             e_ptr, e_baton = delta.make_editor(editor)
-            repos.dir_delta(base_root, '', '', root, self.root, e_ptr, e_baton,
-                authz_cb, 0, 1, 0, 0)
+            repos.dir_delta(
+                base_root, '', '', root, self.root, e_ptr, e_baton, authz_cb,
+                0, 1, 0, 0)
             break
 
 class SvnDumperEditor(delta.Editor):
@@ -684,9 +689,11 @@ class RcsKeywords:
                                 if (expkw & self.RCS_KW_FULLPATH) != 0 \
                                 else os.path.basename(filename)
                         expbuf += " "
-                        logbuf = p + ('Revision %s  %s  %s\n' % (
-                            rev[0], time.strftime("%Y/%m/%d %H:%M:%S",
-                            time.gmtime(rev[1])), rev[2])).encode('ascii')
+                        logbuf = p + (
+                            'Revision %s  %s  %s\n' % (
+                                rev[0], time.strftime(
+                                    "%Y/%m/%d %H:%M:%S", time.gmtime(rev[1])),
+                                rev[2])).encode('ascii')
                         for lline in rcs.getlog(rev[0]).rstrip().split(b'\n'):
                             if len(lline) == 0:
                                 logbuf += p.rstrip() + b'\n'
