@@ -83,7 +83,7 @@ def main():
             elif opt == '-h':
                 usage()
                 sys.exit(1)
-    except Exception as msg:
+    except getopt.GetoptError as msg:
         print(msg, file=sys.stderr)
         usage()
         sys.exit(1)
@@ -177,7 +177,7 @@ def main():
                 how = 'ignore' if i == len(log_encodings) - 1 else 'strict'
                 log = log.decode(e, how)
                 break
-            except:
+            except UnicodeError:
                 pass
         log = log.encode('utf-8', 'ignore')
 
@@ -541,7 +541,7 @@ class RcsKeywords:
             try:
                 line = line0.decode('ascii')
                 m = self.re_kw.match(line)
-            except:
+            except UnicodeError:
                 pass
             if line is None or m is None:
                 # No RCS Keywords, use it as it is
@@ -551,7 +551,7 @@ class RcsKeywords:
             while m is not None:
                 try:
                     dsign = m.end(1) + line[m.end(1):].index('$')
-                except:
+                except ValueError:
                     break
                 prefix = line[:m.start(1)-1]
                 line = line[dsign + 1:]
