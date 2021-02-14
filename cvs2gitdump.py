@@ -497,7 +497,7 @@ class RcsKeywords:
 
     def rerecomple(self):
         pat = '|'.join(list(self.rcs_expkw.keys()))
-        self.re_kw = re.compile(r".*?\$(" + pat + ")[\$:]")
+        self.re_kw = re.compile(r".*?\$(" + pat + r")[\$:]")
 
     def add_id_keyword(self, keyword):
         self.rcs_expkw[keyword] = self.RCS_KW_ID
