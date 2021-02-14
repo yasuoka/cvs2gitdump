@@ -42,14 +42,14 @@ import time
 
 from hashlib import md5
 from svn import core, fs, delta, repos
+from functools import reduce
 
 CHANGESET_FUZZ_SEC = 300
 
 def usage():
-    print >>sys.stderr, \
-            'usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] '\
+    print('usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] '\
                 '[-E log_encodings]\n'\
-            '\t[-k rcs_keywords] [-m module] cvsroot [svnroot svnpath]]'
+            '\t[-k rcs_keywords] [-m module] cvsroot [svnroot svnpath]]', file=sys.stderr)
 
 def main():
     email_domain = None
@@ -78,8 +78,8 @@ def main():
             elif opt == '-h':
                 usage()
                 sys.exit(1)
-    except Exception, msg:
-        print >>sys.stderr, msg
+    except Exception as msg:
+        print(msg, file=sys.stderr)
         usage()
         sys.exit(1)
 
@@ -107,8 +107,8 @@ def main():
             svn.load(svnroot)
             if svn.last_rev is not None:
                 do_incremental = True
-                print >>sys.stderr, '** svn loaded revision r%d by %s' % \
-                        (svn.last_rev, svn.last_author)
+                print('** svn loaded revision r%d by %s' % \
+                        (svn.last_rev, svn.last_author), file=sys.stderr)
         except:
             pass
 
@@ -121,7 +121,7 @@ def main():
             last_author = svn.last_author
 
     cvs = CvsConv(cvsroot, rcs, not do_incremental, fuzzsec)
-    print >>sys.stderr, '** walk cvs tree'
+    print('** walk cvs tree', file=sys.stderr)
     if len(modules) == 0:
         cvs.walk()
     else:
@@ -132,7 +132,7 @@ def main():
 
     changesets = sorted(cvs.changesets)
     nchangesets = len(changesets)
-    print >>sys.stderr, '** cvs has %d changeset' % (nchangesets)
+    print('** cvs has %d changeset' % (nchangesets), file=sys.stderr)
 
     if nchangesets <= 0:
         sys.exit(0)
@@ -153,8 +153,8 @@ def main():
         if k.max_time > max_time_max:
             break
         if not printOnce:
-            print 'SVN-fs-dump-format-version: 2'
-            print ''
+            print('SVN-fs-dump-format-version: 2')
+            print('')
             printOnce = True
 
         # parse the first file to get log
@@ -180,11 +180,11 @@ def main():
         revprops += str_prop('svn:log', log)
         revprops += 'PROPS-END\n'
 
-        print 'Revision-number: %d' % (i + 1)
-        print 'Prop-content-length: %d' % (len(revprops))
-        print 'Content-length: %d' % (len(revprops))
-        print ''
-        print revprops
+        print('Revision-number: %d' % (i + 1))
+        print('Prop-content-length: %d' % (len(revprops)))
+        print('Content-length: %d' % (len(revprops)))
+        print('')
+        print(revprops)
 
         for f in k.revs:
             rcsfile = rcsparse.rcsfile(f.path)
@@ -200,37 +200,37 @@ def main():
             p = node_path(cvs.cvsroot, svnpath, f.path)
             if f.state == 'dead':
                 if not svn.exists(p):
-                    print >> sys.stderr, "Warning: remove '%s', but it does "\
-                        "not exist." % (p)
+                    print("Warning: remove '%s', but it does "\
+                        "not exist." % (p), file=sys.stderr)
                     continue
-                print 'Node-path: %s' % (p)
-                print 'Node-kind: file'
-                print 'Node-action: delete'
-                print ''
+                print('Node-path: %s' % (p))
+                print('Node-kind: file')
+                print('Node-action: delete')
+                print('')
                 svn.remove(p)
                 continue
             elif not svn.exists(p):
                 svn.add(p)
-                print 'Node-path: %s' % (p)
-                print 'Node-kind: file'
-                print 'Node-action: add'
+                print('Node-path: %s' % (p))
+                print('Node-kind: file')
+                print('Node-action: add')
             else:
-                print 'Node-path: %s' % (p)
-                print 'Node-kind: file'
-                print 'Node-action: change'
+                print('Node-path: %s' % (p))
+                print('Node-kind: file')
+                print('Node-action: change')
 
-            print 'Prop-content-length: %d' % (len(fileprops))
-            print 'Text-content-length: %s' % (len(filecont))
-            print 'Text-content-md5: %s' % (md5sum.hexdigest())
-            print 'Content-length: %d' % (len(fileprops) + len(filecont))
-            print ''
-            print fileprops + filecont
-            print ''
+            print('Prop-content-length: %d' % (len(fileprops)))
+            print('Text-content-length: %s' % (len(filecont)))
+            print('Text-content-md5: %s' % (md5sum.hexdigest()))
+            print('Content-length: %d' % (len(fileprops) + len(filecont)))
+            print('')
+            print(fileprops + filecont)
+            print('')
 
     if do_incremental and not found_last_revision:
         raise Exception('could not find the last revision')
 
-    print >>sys.stderr, '** dumped'
+    print('** dumped', file=sys.stderr)
 
 class FileRevision:
     def __init__(self, path, rev, state, markseq):
@@ -316,7 +316,7 @@ class CvsConv:
                 if not f[-2:] == ',v': continue
                 self.parse_file(root + os.sep + f)
 
-        for t,c in self.tags.items():
+        for t,c in list(self.tags.items()):
             c.tags.append(t)
 
     def parse_file(self, path):
@@ -325,7 +325,7 @@ class CvsConv:
         path_related = path[len(self.cvsroot) + 1:][:-2]
         branches = {'1': 'HEAD', '1.1.1': 'VENDOR' }
         have_111 = False
-        for k,v in rcsfile.symbols.items():
+        for k,v in list(rcsfile.symbols.items()):
             r = v.split('.')
             if len(r) == 3:
                 branches[v] = 'VENDOR'
@@ -333,12 +333,12 @@ class CvsConv:
                 z = reduce(lambda a, b: a + '.' + b, r[:-2] + r[-1:])
                 branches[reduce(lambda a, b: a + '.' + b, r[:-2] + r[-1:])] = k
             if len(r) == 2 and branches[r[0]] == 'HEAD':
-                if not rtags.has_key(v):
+                if v not in rtags:
                     rtags[v] = list()
                 rtags[v].append(k)
 
         # sort by time and revision
-        revs = sorted(rcsfile.revs.items(), \
+        revs = sorted(list(rcsfile.revs.items()), \
                 lambda a,b: cmp(a[1][1], b[1][1]) or cmp(b[1][0], a[1][0]))
         p = '0'
         novendor = False
@@ -383,20 +383,20 @@ class CvsConv:
                 a = ChangeSetKey(branches[b], v[2], v[1], rcsfile.getlog(v[0]),
                         v[6], self.fuzzsec)
             except Exception as e:
-                print >>sys.stderr, 'Aborted at %s %s' % (path, v[0])
+                print('Aborted at %s %s' % (path, v[0]), file=sys.stderr)
                 raise e
 
             a.put_file(path, k, v[3], self.markseq)
-            while self.changesets.has_key(a):
+            while a in self.changesets:
                 c = self.changesets[a]
                 del self.changesets[a]
                 c.merge(a)
                 a = c
             self.changesets[a] = a
             p = k
-            if rtags.has_key(k):
+            if k in rtags:
                 for t in rtags[k]:
-                    if not self.tags.has_key(t) or \
+                    if t not in self.tags or \
                             self.tags[t].max_time < a.max_time:
                         self.tags[t] = a
 
@@ -431,13 +431,13 @@ class SvnDumper:
 
     def exists(self, path):
         d = os.path.dirname(path)
-        if not self.dirs.has_key(d):
+        if d not in self.dirs:
             return False
-        return self.dirs[d].has_key(os.path.basename(path))
+        return os.path.basename(path) in self.dirs[d]
 
     def add(self, path):
         d = os.path.dirname(path)
-        if not self.dirs.has_key(d):
+        if d not in self.dirs:
             self.mkdir(d)
         self.dirs[d][os.path.basename(path)] = 1
 
@@ -451,32 +451,32 @@ class SvnDumper:
     def rmdir(self, path):
         if len(self.dirs[path]) > 0:
             return
-        for r in self.dirs.keys():
+        for r in list(self.dirs.keys()):
             if r != path and r.startswith(path + '/'):
                 return
         if self.dump:
-            print 'Node-path: %s' % (path)
-            print 'Node-kind: dir'
-            print 'Node-action: delete'
-            print ''
+            print('Node-path: %s' % (path))
+            print('Node-kind: dir')
+            print('Node-action: delete')
+            print('')
         del self.dirs[path]
         d = os.path.dirname(path)
-        if d == path or not self.dirs.has_key(d):
+        if d == path or d not in self.dirs:
             return
         self.rmdir(d)
 
     def mkdir(self, path):
-        if not self.dirs.has_key(path):
+        if path not in self.dirs:
             d = os.path.dirname(path)
             if d == path:
                 return
             self.mkdir(d)
             if self.dump:
-                print 'Node-path: %s' % (path)
-                print 'Node-kind: dir'
-                print 'Node-action: add'
-                print ''
-                print ''
+                print('Node-path: %s' % (path))
+                print('Node-kind: dir')
+                print('Node-action: add')
+                print('')
+                print('')
             self.dirs[path] = {}
 
     def load(self, repo_path):
@@ -560,7 +560,7 @@ class RcsKeywords:
         self.rerecomple()
 
     def rerecomple(self):
-        pat = '|'.join(self.rcs_expkw.keys())
+        pat = '|'.join(list(self.rcs_expkw.keys()))
         self.re_kw = re.compile(r".*?\$(" + pat + ")[\$:]")
 
     def add_id_keyword(self, keyword):
