@@ -18,7 +18,7 @@ An alternative to
 - [cvs-fast-export](http://www.catb.org/~esr/cvs-fast-export/cvs-fast-export.html)
 
 Prerequisite:
-- [rcsparse](http://gitorious.org/fromcvs/rcsparse)
+- [rcsparse](https://github.com/corecode/rcsparse)
 
 
 Usage
