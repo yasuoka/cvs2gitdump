@@ -55,7 +55,7 @@ def main():
     do_incremental = False
     dump_all = False
     log_encoding = 'utf-8,iso-8859-1'
-    rcs = RcsKeywords();
+    rcs = RcsKeywords()
     modules = []
     fuzzsec = CHANGESET_FUZZ_SEC
 
@@ -162,7 +162,7 @@ def main():
         log = rcsparse.rcsfile(k.revs[0].path).getlog(k.revs[0].rev)
         for i, e in enumerate(log_encodings):
             try:
-                how = 'ignore' if i == len(log_encodings) - 1 else 'strict';
+                how = 'ignore' if i == len(log_encodings) - 1 else 'strict'
                 log = log.decode(e, how)
                 break
             except:
