@@ -511,15 +511,10 @@ class RcsKeywords:
                 m = self.re_kw.match(line)
                 if m is None:
                     break
-                if len(line) > m.end(1) and line[m.end(1)] == '$':
-                    dsign = m.end(1)
-                else:
-                    try:
-                        dsign = string.index(line, '$', m.end(1))
-                        if dsign < 0:
-                            break
-                    except:
-                        break
+                try:
+                    dsign = m.end(1) + line[m.end(1):].index('$')
+                except:
+                    braek;
                 prefix = line[:m.start(1)-1]
                 line = line[dsign + 1:]
                 s += prefix
