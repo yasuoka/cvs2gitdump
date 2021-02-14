@@ -152,8 +152,8 @@ def main():
         if k.max_time > max_time_max:
             break
         if not printOnce:
-            print('SVN-fs-dump-format-version: 2')
-            print('')
+            output('SVN-fs-dump-format-version: 2')
+            output('')
             printOnce = True
 
         # parse the first file to get log
@@ -179,11 +179,11 @@ def main():
         revprops += str_prop('svn:log', log)
         revprops += 'PROPS-END\n'
 
-        print('Revision-number: %d' % (i + 1))
-        print('Prop-content-length: %d' % (len(revprops)))
-        print('Content-length: %d' % (len(revprops)))
-        print('')
-        print(revprops)
+        output('Revision-number: %d' % (i + 1))
+        output('Prop-content-length: %d' % (len(revprops)))
+        output('Content-length: %d' % (len(revprops)))
+        output('')
+        output(revprops)
 
         for f in k.revs:
             rcsfile = rcsparse.rcsfile(f.path)
@@ -202,29 +202,30 @@ def main():
                     print("Warning: remove '%s', but it does "\
                         "not exist." % (p), file=sys.stderr)
                     continue
-                print('Node-path: %s' % (p))
-                print('Node-kind: file')
-                print('Node-action: delete')
-                print('')
+                output('Node-path: %s' % (p))
+                output('Node-kind: file')
+                output('Node-action: delete')
+                output('')
                 svn.remove(p)
                 continue
             elif not svn.exists(p):
                 svn.add(p)
-                print('Node-path: %s' % (p))
-                print('Node-kind: file')
-                print('Node-action: add')
+                output('Node-path: %s' % (p))
+                output('Node-kind: file')
+                output('Node-action: add')
             else:
-                print('Node-path: %s' % (p))
-                print('Node-kind: file')
-                print('Node-action: change')
+                output('Node-path: %s' % (p))
+                output('Node-kind: file')
+                output('Node-action: change')
 
-            print('Prop-content-length: %d' % (len(fileprops)))
-            print('Text-content-length: %s' % (len(filecont)))
-            print('Text-content-md5: %s' % (md5sum.hexdigest()))
-            print('Content-length: %d' % (len(fileprops) + len(filecont)))
-            print('')
-            print(fileprops + filecont)
-            print('')
+            output('Prop-content-length: %d' % (len(fileprops)))
+            output('Text-content-length: %s' % (len(filecont)))
+            output('Text-content-md5: %s' % (md5sum.hexdigest()))
+            output('Content-length: %d' % (len(fileprops) + len(filecont)))
+            output('')
+            output(fileprops, end='')
+            output(filecont)
+            output('')
 
     if do_incremental and not found_last_revision:
         raise Exception('could not find the last revision')
@@ -486,10 +487,10 @@ class SvnDumper:
             if r != path and r.startswith(path + '/'):
                 return
         if self.dump:
-            print('Node-path: %s' % (path))
-            print('Node-kind: dir')
-            print('Node-action: delete')
-            print('')
+            output('Node-path: %s' % (path))
+            output('Node-kind: dir')
+            output('Node-action: delete')
+            output('')
         del self.dirs[path]
         d = os.path.dirname(path)
         if d == path or d not in self.dirs:
@@ -503,11 +504,11 @@ class SvnDumper:
                 return
             self.mkdir(d)
             if self.dump:
-                print('Node-path: %s' % (path))
-                print('Node-kind: dir')
-                print('Node-action: add')
-                print('')
-                print('')
+                output('Node-path: %s' % (path))
+                output('Node-kind: dir')
+                output('Node-action: add')
+                output('')
+                output('')
             self.dirs[path] = {}
 
     def load(self, repo_path):
