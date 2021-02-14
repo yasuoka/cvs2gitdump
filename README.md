@@ -99,7 +99,7 @@ First import:
 
 Periodic import:
 
-    % sudo reposync
+    % doas reposync
     % python cvs2gitdump.py -k OpenBSD -e openbsd.org /cvs/openbsd/src /git/openbsd.git > openbsd2.dump
     % git --git-dir /git/openbsd.git fast-import < openbsd2.dump
 
@@ -193,7 +193,7 @@ First import:
 
 Periodic import:
 
-    % sudo cvsync
+    % doas cvsync
     % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src file:///svnrepo vendor/openbsd/head/src > openbsd2.dump
     % svnadmin load /svnrepo < openbsd2.dump
 
