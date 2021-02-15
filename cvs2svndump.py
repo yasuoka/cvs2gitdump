@@ -567,18 +567,18 @@ class RcsKeywords:
     RCS_KW_HEADER   = (RCS_KW_ID | RCS_KW_FULLPATH)
 
     rcs_expkw = {
-        "Author":   RCS_KW_AUTHOR,
-        "Date":     RCS_KW_DATE ,
-        "Header":   RCS_KW_HEADER,
-        "Id":       RCS_KW_ID,
-        "Log":      RCS_KW_LOG,
-        "Name":     RCS_KW_NAME,
-        "RCSfile":  RCS_KW_RCSFILE,
-        "Revision": RCS_KW_REVISION,
-        "Source":   RCS_KW_SOURCE,
-        "State":    RCS_KW_STATE,
-        "Mdocdate": RCS_KW_MDOCDATE,
-        "Locker":   RCS_KW_LOCKER
+        b"Author":   RCS_KW_AUTHOR,
+        b"Date":     RCS_KW_DATE ,
+        b"Header":   RCS_KW_HEADER,
+        b"Id":       RCS_KW_ID,
+        b"Log":      RCS_KW_LOG,
+        b"Name":     RCS_KW_NAME,
+        b"RCSfile":  RCS_KW_RCSFILE,
+        b"Revision": RCS_KW_REVISION,
+        b"Source":   RCS_KW_SOURCE,
+        b"State":    RCS_KW_STATE,
+        b"Mdocdate": RCS_KW_MDOCDATE,
+        b"Locker":   RCS_KW_LOCKER
     }
 
     RCS_KWEXP_NONE    = (1 << 0)
@@ -594,11 +594,11 @@ class RcsKeywords:
         self.rerecomple()
 
     def rerecomple(self):
-        pat = '|'.join(list(self.rcs_expkw.keys()))
-        self.re_kw = re.compile(r".*?\$(" + pat + r")[\$:]")
+        pat = b'|'.join(list(self.rcs_expkw.keys()))
+        self.re_kw = re.compile(b".*?\\$(" + pat + b")[\\$:]")
 
     def add_id_keyword(self, keyword):
-        self.rcs_expkw[keyword] = self.RCS_KW_ID
+        self.rcs_expkw[keyword.encode('ascii')] = self.RCS_KW_ID
         self.rerecomple()
 
     def kflag_get(self,flags):
@@ -633,31 +633,26 @@ class RcsKeywords:
             return rcs.checkout(rev[0])
 
         ret = b''
-        for line0 in rcs.checkout(rev[0]).split(b'\n'):
+        for line in rcs.checkout(rev[0]).split(b'\n'):
             logbuf = None
-            line = None
-            try:
-                line = line0.decode('ascii')
-                m = self.re_kw.match(line)
-            except UnicodeError:
-                pass
-            if line is None or m is None:
+            m = self.re_kw.match(line)
+            if m is None:
                 # No RCS Keywords, use it as it is
-                ret += line0 + b'\n'
+                ret += line + b'\n'
                 continue
 
             while m is not None:
                 try:
-                    dsign = m.end(1) + line[m.end(1):].index('$')
+                    dsign = m.end(1) + line[m.end(1):].index(b'$')
                 except ValueError:
                     break
                 prefix = line[:m.start(1)-1]
                 line = line[dsign + 1:]
-                ret += prefix.encode('ascii')
+                ret += prefix
                 expbuf = ''
                 if (mode & self.RCS_KWEXP_NAME) != 0:
                     expbuf += '$'
-                    expbuf += m.group(1)
+                    expbuf += m.group(1).decode('ascii')
                     if (mode & self.RCS_KWEXP_VAL) != 0:
                         expbuf += ': '
                 if (mode & self.RCS_KWEXP_VAL) != 0:
@@ -684,7 +679,7 @@ class RcsKeywords:
                         expbuf += rev[3]
                         expbuf += " "
                     if (expkw & self.RCS_KW_LOG) != 0:
-                        p = prefix.encode('ascii')
+                        p = prefix
                         expbuf += filename \
                                 if (expkw & self.RCS_KW_FULLPATH) != 0 \
                                 else os.path.basename(filename)
@@ -714,7 +709,7 @@ class RcsKeywords:
                 ret += expbuf[:255].encode('ascii')
                 m = self.re_kw.match(line)
 
-            ret += (line + '\n').encode('ascii')
+            ret += line + b'\n'
             if logbuf is not None:
                 ret += logbuf
         return ret[:-1]
