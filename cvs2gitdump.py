@@ -108,7 +108,7 @@ def main():
         outs = git.stdout.readlines()
         git.wait()
         if git.returncode != 0:
-            print("Coundn't exec git", file=sys.stderr)
+            print("Couldn't exec git", file=sys.stderr)
             sys.exit(git.returncode)
         git_tip = outs[2].strip()
 
