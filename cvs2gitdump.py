@@ -201,7 +201,7 @@ def main():
         for m in marks:
             f = marks[m]
             mode = 0o100755 if os.access(f.path, os.X_OK) else 0o100644
-            fn = node_path(cvs.cvsroot, None, f.path) # XXX
+            fn = file_path(cvs.cvsroot, f.path)
             if f.state == 'dead':
                 output('D', fn)
             else:
@@ -432,7 +432,7 @@ class CvsConv:
                             self.tags[t].max_time < a.max_time:
                         self.tags[t] = a
 
-def node_path(r, n, p):
+def file_path(r, p):
     if r.endswith('/'):
         r = r[:-1]
     path = p[:-2]               # drop ",v"
@@ -441,9 +441,7 @@ def node_path(r, n, p):
         path = '/'.join(p[:-2] + [p[-1]])
     if path.startswith(r):
         path = path[len(r) + 1:]
-    if n is None or len(n) == 0:
-        return path
-    return '%s/%s' % (n, path)
+    return path
 
 def git_dump_file(path, k, rcs, markseq):
     try:
