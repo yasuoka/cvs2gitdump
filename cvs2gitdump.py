@@ -540,15 +540,16 @@ class RcsKeywords:
         if (mode & (self.RCS_KWEXP_NONE | self.RCS_KWEXP_OLD)) != 0:
             return rcs.checkout(rev[0])
 
-        ret = b''
+        ret = []
         for line in rcs.checkout(rev[0]).split(b'\n'):
             logbuf = None
             m = self.re_kw.match(line)
             if m is None:
                 # No RCS Keywords, use it as it is
-                ret += line + b'\n'
+                ret += [line]
                 continue
 
+            line0 = b''
             while m is not None:
                 try:
                     dsign = m.end(1) + line[m.end(1):].index(b'$')
@@ -556,7 +557,7 @@ class RcsKeywords:
                     break
                 prefix = line[:m.start(1)-1]
                 line = line[dsign + 1:]
-                ret += prefix
+                line0 += prefix
                 expbuf = ''
                 if (mode & self.RCS_KWEXP_NAME) != 0:
                     expbuf += '$'
@@ -603,10 +604,10 @@ class RcsKeywords:
                             else:
                                 logbuf += p + lline.lstrip() +  b'\n'
                         if len(line) == 0:
-                            logbuf += p.rstrip() + b'\n'
+                            logbuf += p.rstrip()
                         else:
-                            logbuf += p + line.lstrip() +  b'\n'
-                        line = ''
+                            logbuf += p + line.lstrip()
+                        line = b''
                     if (expkw & self.RCS_KW_SOURCE) != 0:
                         expbuf += filename
                         expbuf += " "
@@ -614,13 +615,13 @@ class RcsKeywords:
                         expbuf += " "
                 if (mode & self.RCS_KWEXP_NAME) != 0:
                     expbuf += '$'
-                ret += expbuf[:255].encode('ascii')
+                line0 += expbuf[:255].encode('ascii')
                 m = self.re_kw.match(line)
 
-            ret += line + b'\n'
+            ret += [line0 + line]
             if logbuf is not None:
-                ret += logbuf
-        return ret[:-1]
+                ret += [logbuf]
+        return b'\n'.join(ret)
 
 # ----------------------------------------------------------------------
 # entry point
