@@ -370,9 +370,11 @@ class CvsConv:
                     rtags[v] = list()
                 rtags[v].append(k)
 
-        # sort by time and revision
-        revs = sorted(list(rcsfile.revs.items()), \
-            key=lambda a: (a[1][1], a[1][0]))
+        revs = rcsfile.revs.items()
+        # sort by revision descending to priorize 1.1.1.1 than 1.1
+        revs = sorted(revs, key=lambda a: a[1][0], reverse=True)
+        # sort by time
+        revs = sorted(revs, key=lambda a: a[1][1])
         p = '0'
         novendor = False
         have_initial_revision = False
