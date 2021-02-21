@@ -102,9 +102,10 @@ def main():
     if len(args) == 2:
         do_incremental = True
         git = subprocess.Popen(
-            ['git', '--git-dir=' + args[1], 'log', '--max-count', '1',
+            ['git', '--git-dir=' + args[1], '-c',
+             'i18n.logOutputEncoding=UTF-8', 'log', '--max-count', '1',
              '--date=raw', '--format=%ae%n%ad%n%H', git_branch],
-            stdout=subprocess.PIPE)
+            encoding='utf-8', stdout=subprocess.PIPE)
         outs = git.stdout.readlines()
         git.wait()
         if git.returncode != 0:
@@ -114,9 +115,10 @@ def main():
 
         if last_revision is not None:
             git = subprocess.Popen(
-                ['git', '--git-dir=' + args[1], 'log', '--max-count', '1',
+                ['git', '--git-dir=' + args[1], '-c',
+                 'i18n.logOutputEncoding=UTF-8', 'log', '--max-count', '1',
                  '--date=raw', '--format=%ae%n%ad%n%H', last_revision],
-                stdout=subprocess.PIPE)
+                encoding='utf-8', stdout=subprocess.PIPE)
             outs = git.stdout.readlines()
             git.wait()
             if git.returncode != 0:
