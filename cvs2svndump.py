@@ -455,6 +455,9 @@ class SvnDumper:
         self.dirs = {}
         self.dirs[self.root] = {'dontdelete': 1}
         self.dump = False
+        self.last_author = None
+        self.last_date = None
+        self.last_rev = None
 
     def exists(self, path):
         d = os.path.dirname(path)
