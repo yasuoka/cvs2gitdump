@@ -164,7 +164,6 @@ def main():
                 break
             except UnicodeError:
                 pass
-        log = log.encode('utf-8', 'ignore')
 
         if email_domain is None:
             email = k.author
