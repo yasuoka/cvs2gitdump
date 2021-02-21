@@ -45,10 +45,13 @@ import rcsparse
 
 CHANGESET_FUZZ_SEC = 300
 
+
 def usage():
-    print('usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] '\
-                '[-E log_encodings]\n'\
-            '\t[-k rcs_keywords] [-m module] cvsroot [svnroot svnpath]]', file=sys.stderr)
+    print('usage: cvs2svndump [-ah] [-z fuzz] [-e email_domain] '
+          '[-E log_encodings]\n'
+          '\t[-k rcs_keywords] [-m module] cvsroot [svnroot svnpath]]',
+          file=sys.stderr)
+
 
 def main():
     email_domain = None
@@ -105,8 +108,8 @@ def main():
         svn.load(svnroot)
         if svn.last_rev is not None:
             do_incremental = True
-            print('** svn loaded revision r%d by %s' % \
-                    (svn.last_rev, svn.last_author), file=sys.stderr)
+            print('** svn loaded revision r%d by %s' %
+                  (svn.last_rev, svn.last_author), file=sys.stderr)
 
         # strip off the domain part from the last author since cvs doesn't have
         # the domain part.
@@ -192,8 +195,8 @@ def main():
             p = node_path(cvs.cvsroot, svnpath, f.path)
             if f.state == 'dead':
                 if not svn.exists(p):
-                    print("Warning: remove '%s', but it does "\
-                        "not exist." % (p), file=sys.stderr)
+                    print("Warning: remove '%s', but it does "
+                          "not exist." % (p), file=sys.stderr)
                     continue
                 output('Node-path: %s' % (p))
                 output('Node-kind: file')
@@ -225,6 +228,7 @@ def main():
 
     print('** dumped', file=sys.stderr)
 
+
 #
 # Write string objects to stdout with the code decided by Python.
 # Also write byte objects in raw, without any code conversion (file
@@ -243,12 +247,14 @@ def output(*args, end='\n'):
         sys.stdout.write(end)
     sys.stdout.flush()
 
+
 class FileRevision:
     def __init__(self, path, rev, state, markseq):
         self.path = path
         self.rev = rev
         self.state = state
         self.markseq = markseq
+
 
 class ChangeSetKey:
     def __init__(self, branch, author, timestamp, log, commitid, fuzzsec):
@@ -268,14 +274,19 @@ class ChangeSetKey:
 
     def __lt__(self, other):
         return self._cmp(other) < 0
+
     def __gt__(self, other):
         return self._cmp(other) > 0
+
     def __eq__(self, other):
         return self._cmp(other) == 0
+
     def __le__(self, other):
         return self._cmp(other) <= 0
+
     def __ge__(self, other):
         return self._cmp(other) >= 0
+
     def __ne__(self, other):
         return self._cmp(other) != 0
 
@@ -319,10 +330,12 @@ class ChangeSetKey:
     def put_file(self, path, rev, state, markseq):
         self.revs.append(FileRevision(path, rev, state, markseq))
 
+
 def _cmp2(a, b):
     _a = a is not None
     _b = b is not None
     return (a > b) - (a < b) if _a and _b else (_a > _b) - (_a < _b)
+
 
 class CvsConv:
     def __init__(self, cvsroot, rcs, dumpfile, fuzzsec):
@@ -428,6 +441,7 @@ class CvsConv:
                             self.tags[t].max_time < a.max_time:
                         self.tags[t] = a
 
+
 def node_path(r, n, p):
     if r.endswith('/'):
         r = r[:-1]
@@ -441,11 +455,14 @@ def node_path(r, n, p):
         return path
     return '%s/%s' % (n, path)
 
+
 def str_prop(k, v):
     return 'K %d\n%s\nV %d\n%s\n' % (len(k), k, len(v), v)
 
+
 def svn_time(t):
     return time.strftime("%Y-%m-%dT%H:%M:%S.000000Z", time.gmtime(t))
+
 
 class SvnDumper:
     def __init__(self, root=''):
@@ -521,21 +538,24 @@ class SvnDumper:
             hist = fs.history_prev(hist, 0)
             dummy, rev = fs.history_location(hist)
             d = fs.revision_prop(fs_ptr, rev, core.SVN_PROP_REVISION_DATE)
-            author = fs.revision_prop(fs_ptr, rev, \
-                    core.SVN_PROP_REVISION_AUTHOR)
+            author = fs.revision_prop(
+                fs_ptr, rev, core.SVN_PROP_REVISION_AUTHOR)
             if author == 'svnadmin':
                 continue
             self.last_author = author
             self.last_date = core.svn_time_from_cstring(d) / 1000000
             self.last_rev = rev
+
             def authz_cb(root, path, pool):
                 return 1
+
             editor = SvnDumperEditor(self)
             e_ptr, e_baton = delta.make_editor(editor)
             repos.dir_delta(
                 base_root, '', '', root, self.root, e_ptr, e_baton, authz_cb,
                 0, 1, 0, 0)
             break
+
 
 class SvnDumperEditor(delta.Editor):
     def __init__(self, dumper):
@@ -546,6 +566,8 @@ class SvnDumperEditor(delta.Editor):
 
     def add_directory(self, path, *args):
         self.dumper.mkdir(self.dumper.root + '/' + path)
+
+
 class RcsKeywords:
     RCS_KW_AUTHOR   = (1 << 0)
     RCS_KW_DATE     = (1 << 1)
@@ -560,12 +582,12 @@ class RcsKeywords:
     RCS_KW_LOCKER   = (1 << 10)
 
     RCS_KW_ID       = (RCS_KW_RCSFILE | RCS_KW_REVISION | RCS_KW_DATE |
-                       RCS_KW_AUTHOR | RCS_KW_STATE )
+                       RCS_KW_AUTHOR | RCS_KW_STATE)
     RCS_KW_HEADER   = (RCS_KW_ID | RCS_KW_FULLPATH)
 
     rcs_expkw = {
         b"Author":   RCS_KW_AUTHOR,
-        b"Date":     RCS_KW_DATE ,
+        b"Date":     RCS_KW_DATE,
         b"Header":   RCS_KW_HEADER,
         b"Id":       RCS_KW_ID,
         b"Log":      RCS_KW_LOG,
@@ -598,7 +620,7 @@ class RcsKeywords:
         self.rcs_expkw[keyword.encode('ascii')] = self.RCS_KW_ID
         self.rerecomple()
 
-    def kflag_get(self,flags):
+    def kflag_get(self, flags):
         if flags is None:
             return self.RCS_KWEXP_DEFAULT
         fl = 0
@@ -644,7 +666,7 @@ class RcsKeywords:
                     dsign = m.end(1) + line[m.end(1):].index(b'$')
                 except ValueError:
                     break
-                prefix = line[:m.start(1)-1]
+                prefix = line[:m.start(1) - 1]
                 line = line[dsign + 1:]
                 line0 += prefix
                 expbuf = ''
@@ -657,19 +679,19 @@ class RcsKeywords:
                     expkw = self.rcs_expkw[m.group(1)]
                     if (expkw & self.RCS_KW_RCSFILE) != 0:
                         expbuf += filename \
-                                if (expkw & self.RCS_KW_FULLPATH) != 0 \
-                                else os.path.basename(filename)
+                            if (expkw & self.RCS_KW_FULLPATH) != 0 \
+                            else os.path.basename(filename)
                         expbuf += " "
                     if (expkw & self.RCS_KW_REVISION) != 0:
                         expbuf += rev[0]
                         expbuf += " "
                     if (expkw & self.RCS_KW_DATE) != 0:
-                        expbuf += time.strftime("%Y/%m/%d %H:%M:%S ", \
-                                time.gmtime(rev[1]))
+                        expbuf += time.strftime(
+                            "%Y/%m/%d %H:%M:%S ", time.gmtime(rev[1]))
                     if (expkw & self.RCS_KW_MDOCDATE) != 0:
                         d = time.gmtime(rev[1])
-                        expbuf += time.strftime("%B%e %Y " \
-                                if (d.tm_mday < 10) else "%B %e %Y ", d)
+                        expbuf += time.strftime(
+                            "%B%e %Y " if (d.tm_mday < 10) else "%B %e %Y ", d)
                     if (expkw & self.RCS_KW_AUTHOR) != 0:
                         expbuf += rev[2]
                         expbuf += " "
@@ -679,8 +701,8 @@ class RcsKeywords:
                     if (expkw & self.RCS_KW_LOG) != 0:
                         p = prefix
                         expbuf += filename \
-                                if (expkw & self.RCS_KW_FULLPATH) != 0 \
-                                else os.path.basename(filename)
+                            if (expkw & self.RCS_KW_FULLPATH) != 0 \
+                            else os.path.basename(filename)
                         expbuf += " "
                         logbuf = p + (
                             'Revision %s  %s  %s\n' % (
@@ -691,7 +713,7 @@ class RcsKeywords:
                             if len(lline) == 0:
                                 logbuf += p.rstrip() + b'\n'
                             else:
-                                logbuf += p + lline.lstrip() +  b'\n'
+                                logbuf += p + lline.lstrip() + b'\n'
                         if len(line) == 0:
                             logbuf += p.rstrip()
                         else:
@@ -711,6 +733,7 @@ class RcsKeywords:
             if logbuf is not None:
                 ret += [logbuf]
         return b'\n'.join(ret)
+
 
 # ----------------------------------------------------------------------
 # entry point

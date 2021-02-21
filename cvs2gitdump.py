@@ -40,11 +40,13 @@ import rcsparse
 
 CHANGESET_FUZZ_SEC = 300
 
+
 def usage():
-    print('usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] ' \
-                '[-E log_encodings]\n' \
-            '\t[-k rcs_keywords] [-b branch] [-m module] [-l last_revision]\n'\
-            '\tcvsroot [git_dir]', file=sys.stderr)
+    print('usage: cvs2gitdump [-ah] [-z fuzz] [-e email_domain] '
+          '[-E log_encodings]\n'
+          '\t[-k rcs_keywords] [-b branch] [-m module] [-l last_revision]\n'
+          '\tcvsroot [git_dir]', file=sys.stderr)
+
 
 def main():
     email_domain = None
@@ -190,7 +192,7 @@ def main():
         markseq = markseq + 1
         output('mark :%d' % (markseq))
         email = k.author if email_domain is None \
-                else k.author + '@' + email_domain
+            else k.author + '@' + email_domain
         output('author %s <%s> %d +0000' % (k.author, email, k.min_time))
         output('committer %s <%s> %d +0000' % (k.author, email, k.min_time))
 
@@ -221,6 +223,7 @@ def main():
 
     print('** dumped', file=sys.stderr)
 
+
 #
 # Encode by UTF-8 always for string objects since encoding for git-fast-import
 # is UTF-8.  Also write without conversion for a bytes object (file bodies
@@ -238,12 +241,14 @@ def output(*args, end='\n'):
     if len(end) > 0:
         sys.stdout.buffer.write(end.encode('utf-8'))
 
+
 class FileRevision:
     def __init__(self, path, rev, state, markseq):
         self.path = path
         self.rev = rev
         self.state = state
         self.markseq = markseq
+
 
 class ChangeSetKey:
     def __init__(self, branch, author, timestamp, log, commitid, fuzzsec):
@@ -263,14 +268,19 @@ class ChangeSetKey:
 
     def __lt__(self, other):
         return self._cmp(other) < 0
+
     def __gt__(self, other):
         return self._cmp(other) > 0
+
     def __eq__(self, other):
         return self._cmp(other) == 0
+
     def __le__(self, other):
         return self._cmp(other) <= 0
+
     def __ge__(self, other):
         return self._cmp(other) >= 0
+
     def __ne__(self, other):
         return self._cmp(other) != 0
 
@@ -314,10 +324,12 @@ class ChangeSetKey:
     def put_file(self, path, rev, state, markseq):
         self.revs.append(FileRevision(path, rev, state, markseq))
 
+
 def _cmp2(a, b):
     _a = a is not None
     _b = b is not None
     return (a > b) - (a < b) if _a and _b else (_a > _b) - (_a < _b)
+
 
 class CvsConv:
     def __init__(self, cvsroot, rcs, dumpfile, fuzzsec):
@@ -432,6 +444,7 @@ class CvsConv:
                             self.tags[t].max_time < a.max_time:
                         self.tags[t] = a
 
+
 def file_path(r, p):
     if r.endswith('/'):
         r = r[:-1]
@@ -442,6 +455,7 @@ def file_path(r, p):
     if path.startswith(r):
         path = path[len(r) + 1:]
     return path
+
 
 def git_dump_file(path, k, rcs, markseq):
     try:
@@ -457,6 +471,7 @@ def git_dump_file(path, k, rcs, markseq):
     output('data', len(cont))
     output(cont)
 
+
 class RcsKeywords:
     RCS_KW_AUTHOR   = (1 << 0)
     RCS_KW_DATE     = (1 << 1)
@@ -471,12 +486,12 @@ class RcsKeywords:
     RCS_KW_LOCKER   = (1 << 10)
 
     RCS_KW_ID       = (RCS_KW_RCSFILE | RCS_KW_REVISION | RCS_KW_DATE |
-                       RCS_KW_AUTHOR | RCS_KW_STATE )
+                       RCS_KW_AUTHOR | RCS_KW_STATE)
     RCS_KW_HEADER   = (RCS_KW_ID | RCS_KW_FULLPATH)
 
     rcs_expkw = {
         b"Author":   RCS_KW_AUTHOR,
-        b"Date":     RCS_KW_DATE ,
+        b"Date":     RCS_KW_DATE,
         b"Header":   RCS_KW_HEADER,
         b"Id":       RCS_KW_ID,
         b"Log":      RCS_KW_LOG,
@@ -509,7 +524,7 @@ class RcsKeywords:
         self.rcs_expkw[keyword.encode('ascii')] = self.RCS_KW_ID
         self.rerecomple()
 
-    def kflag_get(self,flags):
+    def kflag_get(self, flags):
         if flags is None:
             return self.RCS_KWEXP_DEFAULT
         fl = 0
@@ -555,7 +570,7 @@ class RcsKeywords:
                     dsign = m.end(1) + line[m.end(1):].index(b'$')
                 except ValueError:
                     break
-                prefix = line[:m.start(1)-1]
+                prefix = line[:m.start(1) - 1]
                 line = line[dsign + 1:]
                 line0 += prefix
                 expbuf = ''
@@ -568,19 +583,19 @@ class RcsKeywords:
                     expkw = self.rcs_expkw[m.group(1)]
                     if (expkw & self.RCS_KW_RCSFILE) != 0:
                         expbuf += filename \
-                                if (expkw & self.RCS_KW_FULLPATH) != 0 \
-                                else os.path.basename(filename)
+                            if (expkw & self.RCS_KW_FULLPATH) != 0 \
+                            else os.path.basename(filename)
                         expbuf += " "
                     if (expkw & self.RCS_KW_REVISION) != 0:
                         expbuf += rev[0]
                         expbuf += " "
                     if (expkw & self.RCS_KW_DATE) != 0:
-                        expbuf += time.strftime("%Y/%m/%d %H:%M:%S ", \
-                                time.gmtime(rev[1]))
+                        expbuf += time.strftime(
+                            "%Y/%m/%d %H:%M:%S ", time.gmtime(rev[1]))
                     if (expkw & self.RCS_KW_MDOCDATE) != 0:
                         d = time.gmtime(rev[1])
-                        expbuf += time.strftime("%B%e %Y " \
-                                if (d.tm_mday < 10) else "%B %e %Y ", d)
+                        expbuf += time.strftime(
+                            "%B%e %Y " if (d.tm_mday < 10) else "%B %e %Y ", d)
                     if (expkw & self.RCS_KW_AUTHOR) != 0:
                         expbuf += rev[2]
                         expbuf += " "
@@ -590,8 +605,8 @@ class RcsKeywords:
                     if (expkw & self.RCS_KW_LOG) != 0:
                         p = prefix
                         expbuf += filename \
-                                if (expkw & self.RCS_KW_FULLPATH) != 0 \
-                                else os.path.basename(filename)
+                            if (expkw & self.RCS_KW_FULLPATH) != 0 \
+                            else os.path.basename(filename)
                         expbuf += " "
                         logbuf = p + (
                             'Revision %s  %s  %s\n' % (
@@ -602,7 +617,7 @@ class RcsKeywords:
                             if len(lline) == 0:
                                 logbuf += p.rstrip() + b'\n'
                             else:
-                                logbuf += p + lline.lstrip() +  b'\n'
+                                logbuf += p + lline.lstrip() + b'\n'
                         if len(line) == 0:
                             logbuf += p.rstrip()
                         else:
@@ -622,6 +637,7 @@ class RcsKeywords:
             if logbuf is not None:
                 ret += [logbuf]
         return b'\n'.join(ret)
+
 
 # ----------------------------------------------------------------------
 # entry point
