@@ -355,9 +355,7 @@ class CvsConv:
     def parse_file(self, path):
         rtags = dict()
         rcsfile = rcsparse.rcsfile(path)
-        path_related = path[len(self.cvsroot) + 1:][:-2]
         branches = {'1': 'HEAD', '1.1.1': 'VENDOR'}
-        have_111 = False
         for k, v in list(rcsfile.symbols.items()):
             r = v.split('.')
             if len(r) == 3:
@@ -374,7 +372,6 @@ class CvsConv:
         revs = sorted(revs, key=lambda a: a[1][0], reverse=True)
         # sort by time
         revs = sorted(revs, key=lambda a: a[1][1])
-        p = '0'
         novendor = False
         have_initial_revision = False
         last_vendor_status = None
@@ -429,7 +426,6 @@ class CvsConv:
                 c.merge(a)
                 a = c
             self.changesets[a] = a
-            p = k
             if k in rtags:
                 for t in rtags[k]:
                     if t not in self.tags or \
