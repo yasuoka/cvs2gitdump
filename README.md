@@ -1,5 +1,5 @@
-**cvs2gitdump.py and cvs2svndump.py can run on Python 3 now.  But the upstream
-  "rcsparse" doesn't support running on Python 3. For OpenBSD, use
+**cvs2gitdump.py and cvs2svndump.py can run on Python 3 now.  But
+  "rcsparse" doesn't support running on Python 3.  For OpenBSD, use
   py3-rcsparse-20151027p1 package which will be available for 6.9.**
 
 cvs2gitdump
