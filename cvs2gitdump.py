@@ -101,6 +101,21 @@ def main():
     while cvsroot[-1] == '/':
         cvsroot = cvsroot[:-1]
 
+    if (not os.path.exists(cvsroot)):
+        print >>sys.stderr, "error: %s: no such directory" % cvsroot
+        sys.exit(1)
+    if (not os.path.isdir(cvsroot)):
+        print >>sys.stderr, "error: %s: not a directory" % cvsroot
+        sys.exit(1)
+
+    p = cvsroot + "/" + "CVSROOT"
+    if (not os.path.exists(p)):
+        print >>sys.stderr, "error: %s: no such directory" % p
+        sys.exit(1)
+    if (not os.path.isdir(p)):
+        print >>sys.stderr, "error: %s: not a directory" % p
+        sys.exit(1)
+
     if len(args) == 2:
         do_incremental = True
         git = subprocess.Popen(
