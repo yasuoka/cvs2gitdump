@@ -20,8 +20,8 @@
 .Nm
 is a small python script which imports a cvs tree into a git repository.
 .Nm
-has a small footprint, supports incremental imports and converts tags on HEAD.
-It also converts all tags and CVS branches to Git branches with
+has a small footprint and supports incremental imports.
+It also converts CVS branches and tags with
 .Fl A .
 It's very fast because the conversion is done in memory.
 .Pp
@@ -32,7 +32,11 @@ By default, the script will only use commits 10 minutes older than the most
 recent commit because recent commits are not stable if the repository is
 changing. This option will change this behavior. It will use all the commits.
 .It Fl A
-Convert all tags and CVS branches.
+Convert CVS branches and tags.
+Branches and tags are reset to generated commits.
+No additional commits are synthesized to normalize CVS branch or tag snapshots.
+If a CVS symbol name is used as both a branch and a tag in the imported tree,
+the symbol is collapsed to a branch and no Git tag is generated for that name.
 .It Fl b Ar branch
 The git branch which is used for incremental import. With
 .Fl A ,
@@ -82,3 +86,21 @@ $ git --git-dir /git/openbsd.git fast-import < openbsd2.dump
 .Ed
 .Sh AUTHORS
 .An YASUOKA Masahiko.
+.Sh CAVEATS
+CVS branch and tag symbols are per-file snapshots, while Git branch and tag
+references point to a single commit.
+.Nm
+selects existing generated commits for CVS symbols and does not synthesize
+extra commits to make a Git tree exactly match every CVS symbol snapshot.
+As a result, some imported branch or tag references can differ from
+.Xr cvs 1
+checkouts for files whose CVS symbol revisions do not coexist in a single
+generated Git commit.
+.Pp
+CVS also expands some keywords using the checkout symbol name.
+For example,
+.Sq $Name$
+can expand differently when a file is checked out with a branch or tag.
+.Nm
+does not synthesize branch- or tag-specific keyword-only commits, so such
+keyword values may differ from CVS checkout output.

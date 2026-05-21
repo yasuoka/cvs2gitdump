@@ -11,8 +11,7 @@ A small python script which imports cvs tree into git repository.
 Pros:
 - Small footprint
 - Supports incremental import.  It's very fast
-- Converts tags on HEAD
-- Converts all tags and CVS branches to Git branches with `-A`
+- Converts CVS branches and tags with `-A`
 - Everything is done in memory
 
 An alternative to
@@ -27,9 +26,8 @@ Prerequisite:
 Usage
 -----
 
-    usage: cvs2gitdump [-aAh] [-z fuzz] [-e email_domain]
-        [-E log_encodings] [-k rcs_keywords] [-b branch]
-        [-m module] [-l last_revision]
+    usage: cvs2gitdump [-aAh] [-z fuzz] [-e email_domain] [-E log_encodings]
+        [-k rcs_keywords] [-b branch] [-m module] [-l last_revision]
 	cvsroot [git_dir]
 
 
@@ -44,7 +42,9 @@ Usage
 
 * -A
 
-  Convert all tags and CVS branches.
+  Convert CVS branches and tags.  Branches and tags are reset to generated
+  commits.  No extra commits are synthesized to normalize CVS branch/tag
+  snapshots or symbol-expanded keyword content.
 
 * -b branch
 
@@ -205,4 +205,3 @@ Periodic import:
     % doas cvsync
     % python cvs2svndump.py -k OpenBSD /cvs/openbsd/src file:///svnrepo vendor/openbsd/head/src > openbsd2.dump
     % svnadmin load /svnrepo < openbsd2.dump
-
