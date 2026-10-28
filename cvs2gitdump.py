@@ -49,6 +49,7 @@ def usage():
 
 
 def main():
+    start_timestamp = time.time()
     email_domain = None
     do_incremental = False
     git_tip = None
@@ -180,10 +181,11 @@ def main():
             args[1], git_branch, cvs, existing_refs, existing_branches,
             commits, log_encodings, last_ctime)
 
-    if not dump_all:
-        # don't use last 10 minutes for safety
-        max_time_max = changesets[-1].max_time - 600
-    else:
+    # don't export the last 2 x fuzz (10 minutes) of commits to allow partial
+    # multi-file commits to be grouped together, unless we're explicitly dumping
+    # everything or there have been no new commits for 4 x fuzz.
+    max_time_max = changesets[-1].max_time - fuzzsec * 2
+    if dump_all or max_time_max < start_timestamp - (fuzzsec * 4):
         max_time_max = changesets[-1].max_time
 
     found_last_revision = False
